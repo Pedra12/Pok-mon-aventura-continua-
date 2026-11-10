@@ -109,6 +109,10 @@ func _run() -> void:
             "visual_offset": _vec3_array(calibrated_offset),
             "native_aabb_min": _vec3_array(baseline.position),
             "native_aabb_max": _vec3_array(baseline.end),
+            "imported_root_type": model.get_class(),
+            "imported_root_top_level": model is Node3D and (model as Node3D).top_level,
+            "imported_root_global_transform": model is Node3D and _transform_array((model as Node3D).global_transform),
+            "wrapper_global_transform_after_offset": _transform_array(wrapper.global_transform),
             "native_aabb_size": _vec3_array(baseline.size)
         }
         results.append({
@@ -175,3 +179,6 @@ func _combined_world_bounds(node: Node) -> Dictionary:
 
 func _vec3_array(value: Vector3) -> Array:
     return [value.x, value.y, value.z]
+
+func _transform_array(value: Transform3D) -> Array:
+    return [value.origin.x, value.origin.y, value.origin.z, value.basis.x.x, value.basis.x.y, value.basis.x.z, value.basis.y.x, value.basis.y.y, value.basis.y.z, value.basis.z.x, value.basis.z.y, value.basis.z.z]
