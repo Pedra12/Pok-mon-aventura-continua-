@@ -78,3 +78,19 @@ O relatório detalhado encontrou **29 clipes**, com **26 clipes apresentando mud
 ### Limite desta validação
 
 O workflow importa e inspeciona os GLBs em modo headless. Não renderiza uma sessão visual de cada Pokémon nem certifica qualidade artística, clipping, contato dos pés com o chão ou naturalidade da animação. A próxima etapa precisa gerar cenas de teste/turntables e revisar cada clipe visualmente. O mapa original e os perfis de escala permanecem intocados.
+
+
+## Smoke test de reprodução (execução 42923477986)
+
+Workflow: [42923477986](https://github.com/Pedra12/Pok-mon-aventura-continua-/actions/runs/42923477986). Resultado do artefato `animation_playback_smoke_report.json`:
+
+- **29 clipes testados** em 11 modelos com AnimationPlayer.
+- **17 modelos GLB examinados**; 6 não possuem AnimationPlayer/clipes (Eevee, Lucario, Mew, mapa, Pokébola e Sudowoodo).
+- **0 erros de reprodução registrados**; status geral `success`.
+- Flygon teve os 16 clipes executados; Squirtle, os 2 idles; Smoliv, os 3 clipes; Metagross, o clipe por nós.
+
+Esse teste confirma que os AnimationPlayers e seus clipes podem ser iniciados e avançados pelo Godot sem erro detectado. **Não confirma visualmente** se a animação está bonita, se o Pokémon anda na direção correta, se há clipping ou se o clipe corresponde ao estado de gameplay. Isso continua exigindo cenas renderizadas e revisão visual.
+
+### Próximo passo implementável
+
+Criar uma cena de laboratório de animação no Godot com seleção de Pokémon/clipe, reprodução/pausa, velocidade 0,25x/0,5x/1x e câmera ajustada ao perfil de escala. A cena deve usar os GLBs originais sem editá-los e carregar os perfis de escala existentes. Primeiro alvo: Flygon, por ter o maior conjunto de clipes; em seguida Squirtle. A aprovação será visual, não apenas baseada em logs.
