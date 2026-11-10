@@ -60,6 +60,7 @@ func _run() -> void:
         var calibrated_scale := target_height / baseline.size.y
         wrapper.scale = Vector3.ONE * calibrated_scale
         await process_frame
+        _force_update_recursive(wrapper)
 
         var scaled_result := _combined_world_bounds(model)
         if not scaled_result["valid"]:
@@ -75,6 +76,7 @@ func _run() -> void:
             calibrated_scale *= correction
             wrapper.scale = Vector3.ONE * calibrated_scale
             await process_frame
+            _force_update_recursive(wrapper)
             scaled_result = _combined_world_bounds(model)
             scaled_box = scaled_result["aabb"]
 
@@ -86,6 +88,7 @@ func _run() -> void:
         )
         wrapper.position = calibrated_offset
         await process_frame
+        _force_update_recursive(wrapper)
 
         var final_result := _combined_world_bounds(model)
         if not final_result["valid"]:
@@ -118,7 +121,8 @@ func _run() -> void:
             "imported_root_global_transform": _transform_array((model as Node3D).global_transform) if model is Node3D else [],
             "top_level_nodes_before_normalization": top_level_before,
             "wrapper_global_transform_after_offset": _transform_array(wrapper.global_transform),
-            "native_aabb_size": _vec3_array(baseline.size)
+            "native_aabb_size": _vec3_array(baseline.size),
+            "mesh_transform_samples_after_offset": _mesh_transform_samples(model)
         }
         results.append({
             "file": filename,
@@ -159,6 +163,36 @@ func _run() -> void:
     out.close()
     print("SCALED_INSTANCE_VALIDATION=" + JSON.stringify(output))
     quit(0 if failures.is_empty() and results.size() == parsed["pokemon"].size() else 1)
+
+
+func _force_update_recursive(node: Node) -> void:
+    if node is Node3D:
+        (node as Node3D).force_update_transform()
+    for child in node.get_children():
+        _force_update_recursive(child)
+
+func _mesh_transform_samples(node: Node) -> Array:
+    var samples: Array = []
+    _collect_mesh_samples(node, samples)
+    return samples
+
+func _collect_mesh_samples(node: Node, result: Array) -> void:
+    if node is MeshInstance3D and result.size() < 40:
+        var mesh_instance := node as MeshInstance3D
+        var local_box := mesh_instance.get_aabb()
+        var world_box := local_box * mesh_instance.global_transform
+        result.append({
+            "path": str(mesh_instance.get_path()),
+            "top_level": mesh_instance.top_level,
+            "local_position": _vec3_array(mesh_instance.position),
+            "global_origin": _vec3_array(mesh_instance.global_position),
+            "global_scale": _vec3_array(mesh_instance.global_basis.get_scale()),
+            "local_aabb_min": _vec3_array(local_box.position),
+            "world_aabb_min": _vec3_array(world_box.position),
+            "world_aabb_max": _vec3_array(world_box.end)
+        })
+    for child in node.get_children():
+        _collect_mesh_samples(child, result)
 
 func _collect_top_level_nodes(node: Node, result: Array) -> void:
     if node is Node3D and (node as Node3D).top_level:
