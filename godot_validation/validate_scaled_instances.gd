@@ -38,6 +38,10 @@ func _run() -> void:
         wrapper.add_child(model)
         root.add_child(wrapper)
         await process_frame
+        var top_level_before: Array = []
+        _collect_top_level_nodes(model, top_level_before)
+        _disable_top_level_recursively(model)
+        await process_frame
 
         var baseline_result := _combined_world_bounds(model)
         if not baseline_result["valid"]:
@@ -111,9 +115,11 @@ func _run() -> void:
             "native_aabb_max": _vec3_array(baseline.end),
             "imported_root_type": model.get_class(),
             "imported_root_top_level": model is Node3D and (model as Node3D).top_level,
-            "imported_root_global_transform": model is Node3D and _transform_array((model as Node3D).global_transform),
+            "imported_root_global_transform": _transform_array((model as Node3D).global_transform) if model is Node3D else [],
+            "top_level_nodes_before_normalization": top_level_before,
             "wrapper_global_transform_after_offset": _transform_array(wrapper.global_transform),
-            "native_aabb_size": _vec3_array(baseline.size)
+            "native_aabb_size": _vec3_array(baseline.size),
+            "top_level_nodes_before_normalization": top_level_before
         }
         results.append({
             "file": filename,
@@ -154,6 +160,18 @@ func _run() -> void:
     out.close()
     print("SCALED_INSTANCE_VALIDATION=" + JSON.stringify(output))
     quit(0 if failures.is_empty() and results.size() == parsed["pokemon"].size() else 1)
+
+func _collect_top_level_nodes(node: Node, result: Array) -> void:
+    if node is Node3D and (node as Node3D).top_level:
+        result.append({"path": str(node.get_path()), "class": node.get_class(), "global_transform": _transform_array((node as Node3D).global_transform)})
+    for child in node.get_children():
+        _collect_top_level_nodes(child, result)
+
+func _disable_top_level_recursively(node: Node) -> void:
+    if node is Node3D and (node as Node3D).top_level:
+        (node as Node3D).top_level = false
+    for child in node.get_children():
+        _disable_top_level_recursively(child)
 
 func _combined_world_bounds(node: Node) -> Dictionary:
     var combined := AABB()
