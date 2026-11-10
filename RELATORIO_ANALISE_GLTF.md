@@ -335,3 +335,31 @@ Referências para as alturas da Pokédex:
 - Nenhuma falha na importação dos 17 arquivos.
 
 Os perfis estão prontos como dados de calibração. Ainda não foram aplicados a uma cena jogável, pois isso deve acontecer depois da conferência visual de cada modelo e da análise de superfícies do mapa.
+
+
+## Nona passagem: varredura geométrica das superfícies do mapa
+
+**Execução:** [42887756184](https://github.com/Pedra12/Pok-mon-aventura-continua-/actions/runs/42887756184)  
+**Resultado:** sucesso
+
+O Godot percorreu as 58 superfícies importadas e analisou os triângulos pelas normais, separando faces horizontais voltadas para cima e para baixo.
+
+| Medição | Resultado |
+|---|---:|
+| Superfícies analisadas | 58 |
+| Superfícies com triângulos quase horizontais | 55 |
+| Arquivos do mapa modificados | 0 |
+| Colisores criados | 0 |
+
+Entre as maiores áreas horizontais voltadas para cima aparecem:
+- `Object_23`: aproximadamente 82,10 unidades²
+- `Object_4`: aproximadamente 74,51 unidades²
+- `Object_11`: aproximadamente 42,35 unidades²
+- `Object_10`: aproximadamente 26,09 unidades²
+- `Object_12`: aproximadamente 25,89 unidades²
+
+A maior área horizontal total está em `Object_5`, mas quase toda a área detectada tem normais voltadas para baixo. Isso mostra por que não basta escolher a maior malha para criar o chão.
+
+**Interpretação:** esses objetos são candidatos geométricos, não superfícies de caminhada confirmadas. Podem ser terreno, telhados, plataformas ou outras peças. Os nomes continuam genéricos e a inspeção por normais não identifica portas, escadas, interiores ou obstáculos.
+
+A próxima versão do relatório de superfície inclui a identificação do material e separa as alturas das faces superiores e inferiores. Isso ajuda a distinguir melhor os candidatos antes de criar colisões.
