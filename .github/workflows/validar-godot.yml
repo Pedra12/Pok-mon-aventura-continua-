@@ -1,0 +1,48 @@
+name: Validar importacao dos modelos 3D no Godot
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'godot_validation/**'
+      - '.github/workflows/validar-godot.yml'
+      - '**.glb'
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Godot 4.4.1
+        uses: firebelley/setup-godot@v2
+        with:
+          version: 4.4.1
+          use-dotnet: false
+          include-templates: false
+
+      - name: Preparar projeto temporario com os GLBs originais
+        shell: bash
+        run: |
+          mkdir -p godot_validation/assets
+          find . -maxdepth 1 -type f -iname '*.glb' -exec cp {} godot_validation/assets/ \;
+          echo "Arquivos GLB copiados:"
+          find godot_validation/assets -maxdepth 1 -type f -printf '%f\n'
+
+      - name: Importar assets no Godot
+        run: godot --headless --editor --path godot_validation --import
+
+      - name: Verificar cenas, malhas, esqueletos e animacoes
+        run: godot --headless --path godot_validation --script res://validate_assets.gd
+
+      - name: Publicar relatorio de validacao
+        uses: actions/upload-artifact@v4
+        with:
+          name: validacao-importacao-godot
+          path: godot_validation/godot_validation_report.json
+          if-no-files-found: error
+          retention-days: 30
