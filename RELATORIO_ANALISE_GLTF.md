@@ -107,3 +107,42 @@ O analisador foi ampliado para ler os intervalos de tempo dos samplers e classif
 A duração é calculada pelo maior e menor tempo declarado nos accessors de entrada dos samplers. Isso confirma a faixa temporal armazenada, mas não prova que a animação seja um ciclo contínuo, que esteja visualmente correta ou que corresponda ao nome sugerido. A validação final será feita reproduzindo cada clipe no Godot.
 
 O relatório detalhado atualizado está disponível no artefato da execução [42883950187](https://github.com/Pedra12/Pok-mon-aventura-continua-/actions/runs/42883950187).
+
+
+## Terceira passagem: estrutura detalhada do mapa
+
+**Execucao:** [42884883514](https://github.com/Pedra12/Pok-mon-aventura-continua-/actions/runs/42884883514)  
+**Resultado:** sucesso
+
+O arquivo `original_pokemon_village.glb` foi analisado separadamente, incluindo a hierarquia dos nós e os limites transformados das malhas.
+
+| Propriedade | Resultado |
+|---|---:|
+| Nós na cena | 60 |
+| Malhas | 58 |
+| Vértices de posição estimados | 333.672 |
+| Materiais | 28 |
+| Texturas / imagens | 26 |
+| Dimensões X × Y × Z | 354,140 × 20,632 × 110,698 |
+| Limite mínimo X/Y/Z | -56,347 / -2,000 / -39,929 |
+| Limite máximo X/Y/Z | 297,793 / 18,632 / 70,770 |
+
+### Consequência para o posicionamento no jogo
+
+O centro da caixa envolvente do mapa fica aproximadamente em **X=120,723; Y=8,316; Z=15,420**, portanto não está na origem (0,0,0). Não devemos colocar o personagem no ponto zero supondo que ali seja o centro ou um local livre. O ponto inicial precisa ser escolhido após visualizar o cenário e verificar colisões.
+
+### Organização interna
+
+A cena tem um nó raiz e um nó agrupador que contém 58 malhas. Os nomes das malhas são genéricos (`Object_2` até `Object_59`), sem rótulos que permitam identificar com segurança casas, ruas, árvores ou interiores apenas pelo nome.
+
+Os limites individuais mostram que várias malhas ocupam grandes regiões e outras são estreitas/alongadas. Isso sugere que o cenário foi exportado em partes, mas não permite afirmar qual objeto visual cada malha representa sem abrir o modelo no visualizador 3D.
+
+### Limites desta etapa
+
+- As dimensões foram calculadas pelos limites dos vértices transformados pela hierarquia glTF.
+- A auditoria não encontrou nem criou colisores físicos.
+- Não confirmou se portas e interiores são acessíveis, nem se existem paredes invisíveis.
+- Não definiu escala em metros nem ponto de spawn.
+- O GLB original não foi modificado.
+
+O relatório estruturado completo, incluindo os 60 nós, as 58 malhas e seus limites individuais, está no artefato `auditoria-modelos-3d` da execução acima.
