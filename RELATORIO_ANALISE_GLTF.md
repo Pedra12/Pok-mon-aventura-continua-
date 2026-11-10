@@ -321,3 +321,17 @@ Foi adicionado `tools/validate_scale_profiles.py` ao workflow. Ele compara cada 
 Referências para as alturas da Pokédex:
 - [Documentação da PokéAPI: campo height em decímetros](https://pokeapi.co/docs/v2#pokemon)
 - [Tabela de alturas da Pokédex baseada na PokéAPI](https://pokesizeup.com/pt/pokemon-heights)
+
+
+### Resultado da validação automática dos perfis
+
+**Execução:** [42887440898](https://github.com/Pedra12/Pok-mon-aventura-continua-/actions/runs/42887440898)  
+**Resultado:** sucesso
+
+- 14 perfis conferidos contra os limites medidos novamente pelo Godot.
+- 14 de 14 escalas e deslocamentos aprovados dentro da tolerância.
+- O mapa foi encontrado e carregado.
+- Nenhum GLB original foi redimensionado ou sobrescrito.
+- Nenhuma falha na importação dos 17 arquivos.
+
+Os perfis estão prontos como dados de calibração. Ainda não foram aplicados a uma cena jogável, pois isso deve acontecer depois da conferência visual de cada modelo e da análise de superfícies do mapa.
