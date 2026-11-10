@@ -72,7 +72,7 @@ func _collect_surfaces(node: Node, result: Array) -> void:
                 var horizontal_min_y := INF
                 var horizontal_max_y := -INF
                 var vertex_count := vertices.size()
-                var triangle_count := indices.size() / 3 if indices.size() > 0 else vertex_count / 3
+                var triangle_count: int = int(indices.size() / 3) if indices.size() > 0 else int(vertex_count / 3)
 
                 for triangle_index in range(triangle_count):
                     var ia: int
