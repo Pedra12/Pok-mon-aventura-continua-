@@ -24,7 +24,7 @@ func _run() -> void:
     for item in surfaces:
         if item["horizontal_triangles"] > 0:
             candidates.append(item)
-    candidates.sort_custom(func(a, b): return a["horizontal_area"] > b["horizontal_area"])
+    candidates.sort_custom(func(a, b): return a["upward_horizontal_area"] > b["upward_horizontal_area"])
 
     var output := {
         "map_file": "original_pokemon_village.glb",
@@ -33,7 +33,7 @@ func _run() -> void:
         "mesh_surface_count": surfaces.size(),
         "horizontal_surface_candidates": candidates.size(),
         "surfaces": surfaces,
-        "largest_horizontal_candidates": candidates.slice(0, mini(20, candidates.size())),
+        "largest_upward_candidates": candidates.slice(0, mini(20, candidates.size())),
         "limitations": [
             "Normais e triangulos identificam superficies geometricamente horizontais, nao o uso semantico de cada objeto.",
             "Uma superficie horizontal pode ser chao, telhado, plataforma, mesa ou outro objeto.",
@@ -71,6 +71,10 @@ func _collect_surfaces(node: Node, result: Array) -> void:
                 var down_area := 0.0
                 var horizontal_min_y := INF
                 var horizontal_max_y := -INF
+                var upward_min_y := INF
+                var upward_max_y := -INF
+                var downward_min_y := INF
+                var downward_max_y := -INF
                 var vertex_count := vertices.size()
                 var triangle_count: int = int(indices.size() / 3) if indices.size() > 0 else int(vertex_count / 3)
 
@@ -104,11 +108,15 @@ func _collect_surfaces(node: Node, result: Array) -> void:
                         up_area += twice_area * 0.5
                         horizontal_min_y = min(horizontal_min_y, min(a.y, min(b.y, c.y)))
                         horizontal_max_y = max(horizontal_max_y, max(a.y, max(b.y, c.y)))
+                        upward_min_y = min(upward_min_y, min(a.y, min(b.y, c.y)))
+                        upward_max_y = max(upward_max_y, max(a.y, max(b.y, c.y)))
                     elif ny <= -0.75:
                         down_count += 1
                         down_area += twice_area * 0.5
                         horizontal_min_y = min(horizontal_min_y, min(a.y, min(b.y, c.y)))
                         horizontal_max_y = max(horizontal_max_y, max(a.y, max(b.y, c.y)))
+                        downward_min_y = min(downward_min_y, min(a.y, min(b.y, c.y)))
+                        downward_max_y = max(downward_max_y, max(a.y, max(b.y, c.y)))
                     elif abs(ny) <= 0.25:
                         vertical_count += 1
                     else:
@@ -116,10 +124,24 @@ func _collect_surfaces(node: Node, result: Array) -> void:
 
                 var local_aabb := mesh_instance.get_aabb()
                 var world_aabb := local_aabb * mesh_instance.global_transform
+                var material := mesh.surface_get_material(surface_index)
+                var material_info: Dictionary = {}
+                if material != null:
+                    material_info = {
+                        "class": material.get_class(),
+                        "name": material.resource_name,
+                        "path": material.resource_path
+                    }
+                    if material is BaseMaterial3D:
+                        var base_material := material as BaseMaterial3D
+                        if base_material.albedo_texture != null:
+                            material_info["albedo_texture_name"] = base_material.albedo_texture.resource_name
+                            material_info["albedo_texture_path"] = base_material.albedo_texture.resource_path
                 result.append({
                     "node_path": str(mesh_instance.get_path()),
                     "mesh_name": mesh_instance.name,
                     "surface_index": surface_index,
+                    "material": material_info,
                     "triangle_count": triangle_count,
                     "upward_horizontal_triangles": up_count,
                     "downward_horizontal_triangles": down_count,
@@ -131,6 +153,10 @@ func _collect_surfaces(node: Node, result: Array) -> void:
                     "horizontal_area": up_area + down_area,
                     "horizontal_min_y": horizontal_min_y if up_count + down_count > 0 else null,
                     "horizontal_max_y": horizontal_max_y if up_count + down_count > 0 else null,
+                    "upward_min_y": upward_min_y if up_count > 0 else null,
+                    "upward_max_y": upward_max_y if up_count > 0 else null,
+                    "downward_min_y": downward_min_y if down_count > 0 else null,
+                    "downward_max_y": downward_max_y if down_count > 0 else null,
                     "world_aabb_min": [world_aabb.position.x, world_aabb.position.y, world_aabb.position.z],
                     "world_aabb_max": [world_aabb.end.x, world_aabb.end.y, world_aabb.end.z]
                 })
