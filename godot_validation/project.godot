@@ -1,0 +1,10 @@
+; Projeto isolado para validar importacao dos GLBs no Godot.
+config_version=5
+
+[application]
+config/name="Auditoria 3D de Assets"
+run/main_scene=""
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
