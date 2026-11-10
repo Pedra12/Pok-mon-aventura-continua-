@@ -10,6 +10,10 @@ on:
       - '.github/workflows/validar-godot.yml'
       - '**.glb'
 
+concurrency:
+  group: validacao-godot-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
