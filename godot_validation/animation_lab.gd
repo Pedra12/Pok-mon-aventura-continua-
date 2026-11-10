@@ -71,7 +71,7 @@ func _load_profiles() -> void:
  if FileAccess.file_exists(PROFILE_PATH):
   var parsed = JSON.parse_string(FileAccess.get_file_as_string(PROFILE_PATH))
   if parsed is Dictionary:
-   profiles = parsed.get("profiles", parsed)
+   profiles = parsed.get("pokemon", parsed.get("profiles", parsed))
 
 func _setup_ui() -> void:
  var layer := CanvasLayer.new()
@@ -136,21 +136,25 @@ func _load_model(file_name: String) -> void:
   return
  current_model.name = "PokemonPreview"
  add_child(current_model)
- current_model.position = Vector3.ZERO
- var scale_value := _profile_scale(file_name)
+ var profile := _get_profile(file_name)
+ var scale_value := float(profile.get("uniform_scale", profile.get("scale", 1.0)))
  current_model.scale = Vector3.ONE * scale_value
+ var offset_data: Array = profile.get("visual_offset", [0.0, 0.0, 0.0])
+ if offset_data.size() == 3:
+  current_model.position = Vector3(float(offset_data[0]), float(offset_data[1]), float(offset_data[2]))
+ else:
+  current_model.position = Vector3.ZERO
  current_player = _find_animation_player(current_model)
  _populate_clips()
  _update_camera()
  status_label.text = file_name + " • escala perfil: " + str(scale_value) + " • " + ("AnimationPlayer encontrado" if current_player else "sem clipes")
  model_picker.select(MODEL_FILES.find(file_name))
 
-func _profile_scale(file_name: String) -> float:
- var key := file_name.get_basename()
- var profile = profiles.get(key, profiles.get(file_name, {}))
+func _get_profile(file_name: String) -> Dictionary:
+ var profile = profiles.get(file_name, {})
  if profile is Dictionary:
-  return float(profile.get("scale", profile.get("uniform_scale", 1.0)))
- return 1.0
+  return profile
+ return {}
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
  if node is AnimationPlayer:
