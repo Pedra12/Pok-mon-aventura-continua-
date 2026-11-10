@@ -73,3 +73,37 @@ Portanto, **não aplicar uma escala global igual a todos**. O próximo passo dev
 ## Limites desta auditoria
 
 Esta primeira execução confirmou a presença de arrays de animação, skins, nós, malhas e caixas envolventes. Ela ainda não confirmou que todos os clipes são reproduzíveis, que a animação movimenta o corpo inteiro, nem que a escala reportada está pronta para uso no jogo. Isso exige validação de importação e reprodução no Godot.
+
+
+## Segunda passagem: duração e tipo de canais das animações
+
+O analisador foi ampliado para ler os intervalos de tempo dos samplers e classificar os canais glTF. A segunda execução também terminou com sucesso.
+
+| Modelo | Clipe(s) e duração calculada |
+|---|---|
+| Amoonguss | idle: 2,458 s |
+| Beedrill | Take 001: 4,933 s |
+| Diancie | mixamo.com: 39,600 s |
+| Flygon | 16 clipes entre 0,200 s e 2,360 s |
+| Hisuian Voltorb | Animation: 2,875 s |
+| Ho-Oh | Take 001: 2,458 s |
+| Magnemite | Idle: 3,292 s |
+| Celebi | ArmatureAction.001: 6,500 s |
+| Metagross | Animation: 4,958 s |
+| Smoliv | 3 clipes: 2,792 s; 2,042 s; 2,042 s |
+| Squirtle | Idle_01: 4,000 s; Idle_02: 2,467 s |
+
+### Flygon: clipes úteis já identificados
+
+- Caminhada: `fi20_walk01` (1,480 s).
+- Corrida: `fi21_run01` (1,000 s).
+- Espera: `fi01_wait01` (1,480 s), além de outras variações.
+- Dano: `ba30_damageS01` (0,680 s).
+- Queda: `ba41_down01` (1,680 s).
+- Pouso: `ba01_land01` (0,680 s).
+
+### Cuidado na interpretação
+
+A duração é calculada pelo maior e menor tempo declarado nos accessors de entrada dos samplers. Isso confirma a faixa temporal armazenada, mas não prova que a animação seja um ciclo contínuo, que esteja visualmente correta ou que corresponda ao nome sugerido. A validação final será feita reproduzindo cada clipe no Godot.
+
+O relatório detalhado atualizado está disponível no artefato da execução [42883950187](https://github.com/Pedra12/Pok-mon-aventura-continua-/actions/runs/42883950187).
