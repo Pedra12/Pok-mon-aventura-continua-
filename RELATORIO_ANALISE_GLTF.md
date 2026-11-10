@@ -277,3 +277,47 @@ O verificador foi ampliado para comparar também as transformações globais dos
 - O teste não demonstra ainda que os movimentos são visualmente bons ou adequados para combate/exploração; apenas confirma mudanças de pose ou transformação entre o início e a metade do clipe.
 
 O resultado confirma que Metagross pode usar sua animação atual de peças e que os três clipes de Smoliv não devem ser descartados.
+
+
+## Oitava passagem: perfis individuais de escala e pivô
+
+Os limites foram medidos nas cenas importadas pelo Godot 4.4.1, e não apenas nos accessors dos GLBs. Foi criado `config/pokemon_scale_profiles.json` com um perfil por Pokémon.
+
+A escala uniforme inicial é calculada por:
+
+`escala = altura oficial da Pokédex / altura Y medida no Godot`
+
+O deslocamento visual centraliza o modelo em X/Z e alinha a parte inferior da caixa delimitadora com Y=0. O perfil deverá ser aplicado a um nó-pai de cada modelo, sem alterar os arquivos GLB originais.
+
+| Pokémon | Altura medida no Godot | Altura Pokédex | Escala inicial |
+|---|---:|---:|---:|
+| Amoonguss | 5,8990 | 0,6 m | 0,101712 |
+| Beedrill | 90,8377 | 1,0 m | 0,01100865 |
+| Diancie | 1,7672 | 0,7 m | 0,39611691 |
+| Eevee | 2562,4246 | 0,3 m | 0,00011708 |
+| Flygon | 1,8360 | 2,0 m | 1,08934522 |
+| Hisuian Voltorb | 0,0197 | 0,5 m | 25,352124 |
+| Ho-Oh | 288,9244 | 3,8 m | 0,01315223 |
+| Lucario | 1,8765 | 1,2 m | 0,63948534 |
+| Magnemite | 2,2116 | 0,3 m | 0,13564560 |
+| Mew | 60,0318 | 0,4 m | 0,00666314 |
+| Celebi | 7,3675 | 0,6 m | 0,08143912 |
+| Metagross | 1,4746 | 1,6 m | 1,08503241 |
+| Smoliv | 2,5489 | 0,3 m | 0,11769884 |
+| Squirtle | 0,5314 | 0,5 m | 0,94098296 |
+
+**Atenção:** são perfis calculados, ainda não aplicados ao mapa nem às cenas de jogo. A caixa delimitadora pode incluir asas, apêndices ou partes que alteram a altura visual; por isso, cada resultado ainda precisa de conferência visual. Eevee, Lucario e Mew também continuam sem esqueleto detectado e não recebem rig automaticamente nesta etapa.
+
+### Preservação do mapa
+
+`original_pokemon_village.glb` permanece intacto e fora da lista de escala dos Pokémon. Não vamos redimensionar o cenário para compensar modelos exportados em unidades diferentes.
+
+A auditoria do mapa confirmou 58 malhas, 28 materiais e 26 texturas/imagens. Os nomes das malhas são genéricos (`Object_2` a `Object_59`), então seus limites isolados não bastam para declarar quais superfícies são chão, paredes, telhados ou interiores. A próxima etapa é testar a geometria e os pontos de contato no Godot antes de criar colisões definitivas ou escolher o ponto de nascimento.
+
+### Validação automática dos perfis
+
+Foi adicionado `tools/validate_scale_profiles.py` ao workflow. Ele compara cada perfil com o AABB recém-gerado pelo Godot, recalcula escala e deslocamento e confirma que o mapa continua presente e carregado. A aprovação final depende da nova execução do workflow.
+
+Referências para as alturas da Pokédex:
+- [Documentação da PokéAPI: campo height em decímetros](https://pokeapi.co/docs/v2#pokemon)
+- [Tabela de alturas da Pokédex baseada na PokéAPI](https://pokesizeup.com/pt/pokemon-heights)
