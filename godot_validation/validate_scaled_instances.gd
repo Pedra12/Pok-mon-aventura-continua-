@@ -180,7 +180,7 @@ func _collect_mesh_samples(node: Node, result: Array) -> void:
     if node is MeshInstance3D and result.size() < 40:
         var mesh_instance := node as MeshInstance3D
         var local_box := mesh_instance.get_aabb()
-        var world_box := local_box * mesh_instance.global_transform
+        var world_box := mesh_instance.global_transform * local_box
         result.append({
             "path": str(mesh_instance.get_path()),
             "top_level": mesh_instance.top_level,
