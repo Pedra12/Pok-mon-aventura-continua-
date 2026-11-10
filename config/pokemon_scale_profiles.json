@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "units": "Godot units treated as meters for gameplay calibration",
-  "source": "Caixas locais transformadas corretamente para o espaço global pelo Godot 4.4.1; relatório da execução 42913827272.",
+  "source": "Bounds medidos no Godot 4.4.1 com AnimationPlayers parados na pose inicial; caixas transformadas ao espaco global com Transform3D * AABB. Execucao de calibracao 42913442304.",
   "formula": "uniform_scale = pokedex_height_m / imported_aabb_size_y; visual_offset = [-center_x, -min_y, -center_z] * uniform_scale. AABB global calculada com Transform3D * AABB (transformação direta).",
   "application": "Apply to a wrapper Node3D around the imported GLB instance. Do not edit or rescale the original GLB files. Keep original_pokemon_village.glb unchanged.",
   "warning": "Perfis geometricamente validados no Godot. Modelos com animações devem passar por inspeção visual das poses antes de aprovação final de gameplay.",
@@ -120,14 +120,14 @@
       "imported_aabb_max": [
         1.16002869606018,
         1.36383414268494,
-        0.335763335227966
+        1.2136994600296
       ],
       "imported_height": 1.8359650969505341,
-      "uniform_scale": 1.0893453276001388,
+      "uniform_scale": 1.08934529223452,
       "visual_offset": [
         0,
-        0.5143136490446196,
-        0.571127500102833
+        0.514313638210297,
+        0.0929396152496338
       ],
       "rig_status": "has_skeleton_and_16_clips"
     },
