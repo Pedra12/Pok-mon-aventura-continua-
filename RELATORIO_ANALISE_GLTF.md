@@ -183,3 +183,52 @@ O Godot normalizou alguns nomes de clipes para identificadores compatíveis, por
 ### O que ainda não foi validado
 
 Esta execução confirma carregamento e presença de malhas/esqueletos/clipes. O verificador ainda não reproduziu os clipes nem mediu caixas envolventes após importação. Também não criou colisores ou cenas de gameplay. A próxima etapa será gerar cenas de inspeção e reproduzir os clipes em sequência para conferir visualmente a deformação, orientação, pivô e escala.
+
+
+## Quinta passagem: reprodução dos clipes e comparação das poses no Godot
+
+**Execução:** [42886065008](https://github.com/Pedra12/Pok-mon-aventura-continua-/actions/runs/42886065008)  
+**Resultado:** sucesso
+
+O verificador reproduziu cada clipe do AnimationPlayer, capturou a pose dos ossos no início e a comparou com a pose a 50% da duração.
+
+| Verificação | Resultado |
+|---|---:|
+| GLBs testados | 17 |
+| GLBs carregados | 17 |
+| Falhas de carregamento | 0 |
+| MeshInstance3D | 131 |
+| Skeleton3D | 10 |
+| Clipes encontrados | 29 |
+| Clipes com mudança detectada em ossos | 26 |
+
+### Resultado por Pokémon
+
+| Pokémon | Ossos no Godot | Clipes | Mudança óssea detectada |
+|---|---:|---:|---:|
+| Amoonguss | 16 | 1 | 1 |
+| Beedrill | 41 | 1 | 1 |
+| Diancie | 72 | 1 | 1 |
+| Flygon | 94 | 16 | 16 |
+| Hisuian Voltorb | 4 | 1 | 1 |
+| Ho-Oh | 165 | 1 | 1 |
+| Magnemite | 5 | 1 | 1 |
+| Celebi | 59 | 1 | 1 |
+| Smoliv | 4 | 3 | 1 |
+| Squirtle | 50 | 2 | 2 |
+| Metagross | 0 | 1 | 0 |
+
+Eevee, Lucario e Mew não apresentam esqueleto nem AnimationPlayer.
+
+### Pontos que exigem análise adicional
+
+- Smoliv: dois dos três clipes não alteraram a pose dos ossos. Podem controlar nós/peças em vez do esqueleto.
+- Metagross: possui um AnimationPlayer com um clipe, mas não tem Skeleton3D; a ausência de mudança óssea não prova que o clipe seja inerte.
+- Voltorb e Magnemite: houve mudança óssea, mas em poucos ossos. A qualidade e adequação da animação ainda precisam de inspeção visual.
+- Diancie: só cinco ossos mudaram no ponto amostrado; é necessário verificar se o clipe completo é adequado para uso no jogo.
+
+O teste compara apenas dois instantes (início e metade), então não avalia continuidade, qualidade artística, loop, contato com o chão ou adequação de cada movimento à espécie.
+
+### Próxima verificação
+
+Foi ampliado o verificador para comparar também transformações de todos os nós 3D, além dos ossos. Isso deve esclarecer se os clipes do Metagross e os dois clipes do Smoliv animam objetos ou peças. A nova execução está separada e ainda precisa terminar.
