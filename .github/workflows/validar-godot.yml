@@ -50,6 +50,9 @@ jobs:
       - name: Verificar cenas, malhas, esqueletos e animacoes
         run: godot --headless --path godot_validation --script res://validate_assets.gd
 
+      - name: Auditar cada clipe em cinco pontos e mapear ossos e nos movimentados
+        run: godot --headless --path godot_validation --script res://audit_animation_detail.gd
+
       - name: Validar perfis de escala e preservacao do mapa
         run: python3 tools/validate_scale_profiles.py
 
@@ -67,6 +70,7 @@ jobs:
           name: validacao-importacao-godot
           path: |
             godot_validation/godot_validation_report.json
+            godot_validation/animation_detail_report.json
             godot_validation/scale_profile_validation.json
             godot_validation/scaled_instance_validation.json
             godot_validation/map_surface_analysis.json
