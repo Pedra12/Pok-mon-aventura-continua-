@@ -38,7 +38,8 @@ Consulta à árvore Git recursiva da branch `main` (`git/trees/main?recursive=1`
 - **Possível animação incorporada:** `diancie_dancing_to_sweet_dreams.glb`, nome sugere dança, mas isso não comprova que o GLB contenha um AnimationClip.
 - **Rig/esqueleto indicado:** `smoliv_fully_rigged.glb`; pode ser animável/retargetável, mas não há confirmação de clips embutidos.
 - **Demais 15 GLBs:** não é possível afirmar animação ou ausência dela apenas pelo nome.
-- O endpoint da árvore Git fornece nomes/tamanhos/SHA, não o conteúdo binário interno. O conector GitHub disponível não entrega binários GLB para inspeção de cabeçalho JSON; portanto, **não foi possível enumerar AnimationClips, duração, armature/bones ou testar playback dos 17 modelos nesta auditoria**. Não declarar como “sem animação” sem abrir os binários num leitor GLB.
+- Testei também a leitura do blob binário via integração GitHub: a resposta falhou com erro de decodificação UTF-8 (bytes binários), confirmando que essa interface não permite inspecionar o conteúdo GLB bruto.
+- Assim, **não foi possível enumerar AnimationClips, duração, armature/bones ou testar playback dos 17 modelos**. Não declarar como “sem animação” sem abrir os binários num leitor GLB.
 
 ## Próxima verificação necessária (binária)
 Para concluir de verdade a auditoria de animações, é necessário baixar os GLBs e ler o JSON interno (glTF: `animations[]`, `skins[]`, nodes/bones) ou abrir cada um num visualizador GLB. O teste deve registrar: quantidade e nome dos clips, duração, skeleton/skin, materiais/texturas, escala/orientação e se o playback funciona.
