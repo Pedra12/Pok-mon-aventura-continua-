@@ -363,3 +363,16 @@ A maior área horizontal total está em `Object_5`, mas quase toda a área detec
 **Interpretação:** esses objetos são candidatos geométricos, não superfícies de caminhada confirmadas. Podem ser terreno, telhados, plataformas ou outras peças. Os nomes continuam genéricos e a inspeção por normais não identifica portas, escadas, interiores ou obstáculos.
 
 A próxima versão do relatório de superfície inclui a identificação do material e separa as alturas das faces superiores e inferiores. Isso ajuda a distinguir melhor os candidatos antes de criar colisões.
+
+
+## Décima passagem: plano de animação por espécie
+
+Foi criado `config/pokemon_animation_plan.json` com a lista dos clipes originais, a estratégia de rig e os movimentos que ainda precisam ser produzidos para cada Pokémon.
+
+O plano diferencia:
+- rigs esqueléticos completos (por exemplo Flygon, Ho-Oh e Squirtle);
+- rigs pequenos e específicos (Voltorb e Magnemite);
+- animação de peças por nós (Metagross);
+- rigs que ainda precisam ser criados (Eevee, Lucario e Mew).
+
+Os clipes originais serão preservados. Nomes como `Take 001`, `mixamo.com` e `Animation` não serão classificados como caminhada, ataque ou idle sem reprodução visual. O próximo trabalho de animação deve começar com a inspeção dos clipes existentes e a validação das transformações no mapa.
