@@ -47,6 +47,9 @@ jobs:
       - name: Validar perfis de escala e preservacao do mapa
         run: python3 tools/validate_scale_profiles.py
 
+      - name: Analisar superficies horizontais do mapa
+        run: godot --headless --path godot_validation --script res://inspect_map_surfaces.gd
+
       - name: Publicar relatorio de validacao
         uses: actions/upload-artifact@v4
         with:
@@ -54,5 +57,6 @@ jobs:
           path: |
             godot_validation/godot_validation_report.json
             godot_validation/scale_profile_validation.json
+            godot_validation/map_surface_analysis.json
           if-no-files-found: error
           retention-days: 30
