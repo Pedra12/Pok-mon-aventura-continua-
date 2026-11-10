@@ -83,4 +83,3 @@ jobs:
             godot_validation/map_surface_analysis.json
           if-no-files-found: warn
           retention-days: 30
-      - name: Verificar cenas, malhas, esqueletos e animacoes
