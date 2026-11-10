@@ -252,3 +252,28 @@ O relatório JSON agora inclui a hierarquia dos nós, a lista ordenada de ossos 
 ### Implicação para o rigging
 
 Não será aplicado um rig humanoide genérico indiscriminadamente. Squirtle e Flygon têm estruturas diferentes; criaturas com asas, caudas, corpos esféricos ou múltiplos apêndices precisam de hierarquias e controladores específicos. Os nomes dos ossos serão referência, mas o encaixe final depende da inspeção das malhas e dos pesos de influência.
+
+
+## Sétima passagem: animações de nós e peças
+
+**Execução:** [42886440098](https://github.com/Pedra12/Pok-mon-aventura-continua-/actions/runs/42886440098)  
+**Resultado:** sucesso
+
+O verificador foi ampliado para comparar também as transformações globais dos nós 3D, além das poses dos ossos.
+
+| Verificação | Resultado |
+|---|---:|
+| Arquivos carregados | 17/17 |
+| Clipes examinados | 29 |
+| Clipes com alteração de ossos | 26 |
+| Clipes com alteração de transformação de nós 3D | 5 |
+| Falhas | 0 |
+
+### Descobertas confirmadas
+
+- **Metagross:** o clipe altera a transformação de 20 nós 3D no ponto amostrado. Portanto, a animação de peças está funcionando; não precisa receber um esqueleto genérico só para animar.
+- **Smoliv:** o clipe `Armature|Moving ControllerAction` altera 11 nós 3D e o clipe `Moving Controller|Moving ControllerAction` altera 1 nó 3D. O clipe `Armature|ArmatureAction` altera 3 ossos. Os três clipes têm atividade detectável.
+- **Voltorb:** a mudança detectada está em um osso; não houve mudança de transformação dos nós 3D no teste.
+- O teste não demonstra ainda que os movimentos são visualmente bons ou adequados para combate/exploração; apenas confirma mudanças de pose ou transformação entre o início e a metade do clipe.
+
+O resultado confirma que Metagross pode usar sua animação atual de peças e que os três clipes de Smoliv não devem ser descartados.
