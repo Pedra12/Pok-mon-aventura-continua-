@@ -159,7 +159,7 @@ func _run() -> void:
         push_error("Nao foi possivel gravar relatorio")
         quit(1)
         return
-    out.store_string(JSON.stringify(output, "\\t"))
+    out.store_string(JSON.stringify(output, "\t"))
     out.close()
     print("SCALED_INSTANCE_VALIDATION=" + JSON.stringify(output))
     quit(0 if failures.is_empty() and results.size() == parsed["pokemon"].size() else 1)
@@ -212,7 +212,7 @@ func _combined_world_bounds(node: Node) -> Dictionary:
     if node is MeshInstance3D:
         var mesh_instance := node as MeshInstance3D
         if mesh_instance.mesh != null:
-            var box := mesh_instance.get_aabb() * mesh_instance.global_transform
+            var box := mesh_instance.global_transform * mesh_instance.get_aabb()
             if not found:
                 combined = box
                 found = true
