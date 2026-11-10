@@ -139,7 +139,7 @@ func _inspect_node(node: Node, entry: Dictionary, skeletons: Array[Skeleton3D], 
         entry["mesh_instances"] += 1
         var mesh_instance := node as MeshInstance3D
         var local_bounds := mesh_instance.get_aabb()
-        var world_bounds := local_bounds * mesh_instance.global_transform
+        var world_bounds := mesh_instance.global_transform * local_bounds
         entry["mesh_bounds"].append({
             "node_path": str(mesh_instance.get_path()),
             "local_min": _vec3_array(local_bounds.position),
