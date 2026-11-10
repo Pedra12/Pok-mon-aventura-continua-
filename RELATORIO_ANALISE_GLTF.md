@@ -146,3 +146,40 @@ Os limites individuais mostram que várias malhas ocupam grandes regiões e outr
 - O GLB original não foi modificado.
 
 O relatório estruturado completo, incluindo os 60 nós, as 58 malhas e seus limites individuais, está no artefato `auditoria-modelos-3d` da execução acima.
+
+
+## Quarta passagem: importação real no Godot 4.4.1
+
+**Execução:** [42885381978](https://github.com/Pedra12/Pok-mon-aventura-continua-/actions/runs/42885381978)  
+**Resultado:** sucesso
+
+Os 17 arquivos GLB foram importados como cenas pelo Godot 4.4.1 em modo headless e instanciados por um verificador. Não houve falha de carregamento.
+
+| Verificação | Resultado |
+|---|---:|
+| Arquivos testados | 17 |
+| Arquivos carregados | 17 |
+| Falhas | 0 |
+| Instâncias de malha | 131 |
+| Nós Skeleton3D | 10 |
+| Clipes encontrados pelo Godot | 29 |
+
+### Confirmação do mapa
+
+O Godot importou `original_pokemon_village.glb` sem erro e encontrou **58 MeshInstance3D** distribuídos em 61 nós da cena. Isso confirma que o cenário pode ser carregado como uma cena Godot, mas ainda não valida colisões, acessibilidade ou navegação.
+
+### Confirmação dos Pokémon
+
+- Eevee, Lucario e Mew carregam, mas não apresentam Skeleton3D nem AnimationPlayer.
+- Flygon carrega com 16 clipes e um Skeleton3D com 94 ossos na cena importada.
+- Squirtle carrega com 2 clipes e 50 ossos na cena importada.
+- Metagross carrega com AnimationPlayer e um clipe, mas sem Skeleton3D; deve ser testado como animação de nós/peças.
+- Os demais modelos com animações também carregaram e expuseram seus AnimationPlayers.
+
+### Diferenças de nomes no importador
+
+O Godot normalizou alguns nomes de clipes para identificadores compatíveis, por exemplo `mixamo.com` tornou-se `mixamo_com`, e `ArmatureAction.001` tornou-se `ArmatureAction_001`. Flygon e Smoliv mantêm nomes compostos com separadores. O jogo deverá consultar os nomes efetivamente importados pelo Godot, não presumir que são idênticos aos nomes brutos do glTF.
+
+### O que ainda não foi validado
+
+Esta execução confirma carregamento e presença de malhas/esqueletos/clipes. O verificador ainda não reproduziu os clipes nem mediu caixas envolventes após importação. Também não criou colisores ou cenas de gameplay. A próxima etapa será gerar cenas de inspeção e reproduzir os clipes em sequência para conferir visualmente a deformação, orientação, pivô e escala.
