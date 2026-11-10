@@ -50,6 +50,11 @@ func _run_validation() -> void:
             continue
 
         root.add_child(instance)
+        await process_frame
+        _stop_animations_recursively(instance)
+        await process_frame
+        _force_update_recursive(instance)
+        _inspect_mesh_bounds(instance, entry)
         entry["loaded"] = true
         if instance is Node3D:
             var root_3d := instance as Node3D
@@ -133,10 +138,21 @@ func _pose_differs(a: Transform3D, b: Transform3D) -> bool:
         return true
     return false
 
-func _inspect_node(node: Node, entry: Dictionary, skeletons: Array[Skeleton3D], spatial_nodes: Array[Node3D]) -> void:
-    entry["node_count"] += 1
+
+func _stop_animations_recursively(node: Node) -> void:
+    if node is AnimationPlayer:
+        (node as AnimationPlayer).stop()
+    for child in node.get_children():
+        _stop_animations_recursively(child)
+
+func _force_update_recursive(node: Node) -> void:
+    if node is Node3D:
+        (node as Node3D).force_update_transform()
+    for child in node.get_children():
+        _force_update_recursive(child)
+
+func _inspect_mesh_bounds(node: Node, entry: Dictionary) -> void:
     if node is MeshInstance3D:
-        entry["mesh_instances"] += 1
         var mesh_instance := node as MeshInstance3D
         var local_bounds := mesh_instance.get_aabb()
         var world_bounds := mesh_instance.global_transform * local_bounds
@@ -149,6 +165,13 @@ func _inspect_node(node: Node, entry: Dictionary, skeletons: Array[Skeleton3D], 
             "world_max": _vec3_array(world_bounds.end),
             "world_size": _vec3_array(world_bounds.size)
         })
+    for child in node.get_children():
+        _inspect_mesh_bounds(child, entry)
+
+func _inspect_node(node: Node, entry: Dictionary, skeletons: Array[Skeleton3D], spatial_nodes: Array[Node3D]) -> void:
+    entry["node_count"] += 1
+    if node is MeshInstance3D:
+        entry["mesh_instances"] += 1
     if node is Skeleton3D:
         var skeleton := node as Skeleton3D
         entry["skeletons"].append({
