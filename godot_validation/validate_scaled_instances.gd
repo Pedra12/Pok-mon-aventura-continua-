@@ -71,6 +71,7 @@ func _run() -> void:
             "target_height": target_height,
             "wrapper_scale": float(profile["uniform_scale"]),
             "wrapper_position": offset,
+            "debug_wrapper_global_transform": str(wrapper.global_transform),
             "checks": checks,
             "passed": passed
         })
