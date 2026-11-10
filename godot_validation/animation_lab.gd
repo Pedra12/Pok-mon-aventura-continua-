@@ -245,14 +245,14 @@ func _input(event: InputEvent) -> void:
   if event.button_index == MOUSE_BUTTON_LEFT:
    dragging = event.pressed and event.position.x > 390
    last_pointer = event.position
+  elif event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_UP:
+   orbit_distance = max(1.5, orbit_distance - 0.4)
+   _update_camera()
+  elif event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+   orbit_distance = min(25.0, orbit_distance + 0.4)
+   _update_camera()
  elif event is InputEventMouseMotion and dragging:
   _orbit(event.relative)
- elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
-  orbit_distance = max(1.5, orbit_distance - 0.4)
-  _update_camera()
- elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
-  orbit_distance = min(25.0, orbit_distance + 0.4)
-  _update_camera()
 
 func _orbit(delta: Vector2) -> void:
  orbit_yaw -= delta.x * 0.008
