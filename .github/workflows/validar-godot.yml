@@ -53,5 +53,6 @@ jobs:
           name: validacao-importacao-godot
           path: |
             godot_validation/godot_validation_report.json
-            godot_validation/scale_profile_validation.json\n          if-no-files-found: error
+            godot_validation/scale_profile_validation.json
+          if-no-files-found: error
           retention-days: 30
