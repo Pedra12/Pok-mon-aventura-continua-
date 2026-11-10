@@ -17,6 +17,7 @@ func _run_validation() -> void:
     var total_meshes := 0
     var total_skeletons := 0
     var total_animations := 0
+    var clips_with_pose_changes := 0
     var failures := []
 
     for file_name in files:
@@ -48,11 +49,16 @@ func _run_validation() -> void:
 
         root.add_child(instance)
         entry["loaded"] = true
-        _inspect_node(instance, entry)
+        var skeletons: Array[Skeleton3D] = []
+        _collect_skeletons(instance, skeletons)
+        _inspect_node(instance, entry, skeletons)
         total_meshes += int(entry["mesh_instances"])
         total_skeletons += entry["skeletons"].size()
-        for player in entry["animation_players"]:
-            total_animations += player["clips"].size()
+        for player_data in entry["animation_players"]:
+            total_animations += player_data["clips"].size()
+            for clip in player_data["clips"]:
+                if clip["changed_bones"] > 0:
+                    clips_with_pose_changes += 1
         report["assets"].append(entry)
         instance.queue_free()
         await process_frame
@@ -63,7 +69,8 @@ func _run_validation() -> void:
         "failed": failures,
         "mesh_instances": total_meshes,
         "skeletons": total_skeletons,
-        "animation_clips": total_animations
+        "animation_clips": total_animations,
+        "clips_with_bone_pose_changes": clips_with_pose_changes
     }
     var output := FileAccess.open(OUTPUT_PATH, FileAccess.WRITE)
     if output == null:
@@ -75,7 +82,32 @@ func _run_validation() -> void:
     print("GODOT_VALIDATION_RESULT=" + JSON.stringify(report["summary"]))
     quit(0 if failures.is_empty() else 1)
 
-func _inspect_node(node: Node, entry: Dictionary) -> void:
+func _collect_skeletons(node: Node, result: Array[Skeleton3D]) -> void:
+    if node is Skeleton3D:
+        result.append(node as Skeleton3D)
+    for child in node.get_children():
+        _collect_skeletons(child, result)
+
+func _capture_bone_poses(skeletons: Array[Skeleton3D]) -> Array:
+    var poses: Array = []
+    for skeleton in skeletons:
+        skeleton.force_update_all_bone_transforms()
+        for bone_index in range(skeleton.get_bone_count()):
+            poses.append(skeleton.get_bone_pose(bone_index))
+    return poses
+
+func _pose_differs(a: Transform3D, b: Transform3D) -> bool:
+    if a.origin.distance_to(b.origin) > 0.00001:
+        return true
+    if a.basis.x.distance_to(b.basis.x) > 0.00001:
+        return true
+    if a.basis.y.distance_to(b.basis.y) > 0.00001:
+        return true
+    if a.basis.z.distance_to(b.basis.z) > 0.00001:
+        return true
+    return false
+
+func _inspect_node(node: Node, entry: Dictionary, skeletons: Array[Skeleton3D]) -> void:
     entry["node_count"] += 1
     if node is MeshInstance3D:
         entry["mesh_instances"] += 1
@@ -87,12 +119,35 @@ func _inspect_node(node: Node, entry: Dictionary) -> void:
         })
     if node is AnimationPlayer:
         var player := node as AnimationPlayer
-        var clips: Array[String] = []
+        var clips: Array = []
         for clip_name in player.get_animation_list():
-            clips.append(clip_name)
+            var animation := player.get_animation(clip_name)
+            var track_paths: Array[String] = []
+            for track_index in range(animation.get_track_count()):
+                track_paths.append(animation.track_get_path(track_index).to_string())
+            var changed_bones := 0
+            if not skeletons.is_empty() and animation.length > 0.0:
+                player.play(clip_name)
+                player.seek(0.0, true)
+                var initial_poses := _capture_bone_poses(skeletons)
+                player.seek(animation.length * 0.5, true)
+                var middle_poses := _capture_bone_poses(skeletons)
+                var pose_count: int = mini(initial_poses.size(), middle_poses.size())
+                for pose_index in range(pose_count):
+                    if _pose_differs(initial_poses[pose_index], middle_poses[pose_index]):
+                        changed_bones += 1
+                player.stop()
+            clips.append({
+                "name": clip_name,
+                "duration_seconds": animation.length,
+                "track_count": animation.get_track_count(),
+                "track_paths": track_paths,
+                "changed_bones": changed_bones,
+                "skeletal_pose_changes_detected": changed_bones > 0
+            })
         entry["animation_players"].append({
             "name": player.name,
             "clips": clips
         })
     for child in node.get_children():
-        _inspect_node(child, entry)
+        _inspect_node(child, entry, skeletons)
