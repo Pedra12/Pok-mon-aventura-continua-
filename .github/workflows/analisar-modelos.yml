@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/analisar-modelos.yml'
       - 'tools/analyze_glb.py'
+      - 'tools/audit_map_glb.py'
       - '**.glb'
 
 permissions:
@@ -28,6 +29,9 @@ jobs:
 
       - name: Analisar todos os arquivos GLB
         run: python tools/analyze_glb.py
+
+      - name: Auditar estrutura detalhada do mapa
+        run: python tools/audit_map_glb.py
 
       - name: Publicar relatorios
         uses: actions/upload-artifact@v4
