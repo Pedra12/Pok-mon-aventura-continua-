@@ -124,7 +124,7 @@ func _inspect_node(node: Node, entry: Dictionary, skeletons: Array[Skeleton3D]) 
             var animation := player.get_animation(clip_name)
             var track_paths: Array[String] = []
             for track_index in range(animation.get_track_count()):
-                track_paths.append(animation.track_get_path(track_index).to_string())
+                track_paths.append(str(animation.track_get_path(track_index)))
             var changed_bones := 0
             if not skeletons.is_empty() and animation.length > 0.0:
                 player.play(clip_name)
