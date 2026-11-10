@@ -17,7 +17,42 @@ def inspect(path):
         data["malhas"] = len(gltf.meshes or [])
         data["materiais"] = len(gltf.materials or [])
         data["esqueletos"] = len(gltf.skins or [])
-        data["ossos_por_esqueleto"] = [len(s.joints or []) for s in (gltf.skins or [])]
+        node_names = [node.name or f"No_{i}" for i, node in enumerate(gltf.nodes or [])]
+        parents = {}
+        for parent_index, node in enumerate(gltf.nodes or []):
+            for child_index in (node.children or []):
+                parents[child_index] = parent_index
+        data["hierarquia_nos"] = [
+            {
+                "indice": i,
+                "nome": node_names[i],
+                "pai_indice": parents.get(i),
+                "pai_nome": node_names[parents[i]] if i in parents else None,
+                "filhos": list(node.children or []),
+                "mesh": node.mesh,
+                "skin": node.skin
+            }
+            for i, node in enumerate(gltf.nodes or [])
+        ]
+        data["ossos_por_esqueleto"] = [len(skin.joints or []) for skin in (gltf.skins or [])]
+        data["detalhes_esqueletos"] = [
+            {
+                "indice": si,
+                "nome": skin.name or f"Esqueleto_{si}",
+                "quantidade_ossos": len(skin.joints or []),
+                "ossos": [
+                    {
+                        "ordem": ji,
+                        "no_indice": node_index,
+                        "nome": node_names[node_index] if node_index < len(node_names) else f"No_{node_index}"
+                    }
+                    for ji, node_index in enumerate(skin.joints or [])
+                ],
+                "skeleton_root": skin.skeleton,
+                "skeleton_root_nome": node_names[skin.skeleton] if skin.skeleton is not None and skin.skeleton < len(node_names) else None
+            }
+            for si, skin in enumerate(gltf.skins or [])
+        ]
         data["animacoes"] = []
         for i, anim in enumerate(gltf.animations or []):
             times = []
@@ -28,15 +63,23 @@ def inspect(path):
                         times.extend([float(accessor.min[0]), float(accessor.max[0])])
             duration = (max(times) - min(times)) if times else None
             paths = {}
+            targets = []
             for channel in (anim.channels or []):
                 target_path = channel.target.path if channel.target else "unknown"
                 paths[target_path] = paths.get(target_path, 0) + 1
+                target_node = channel.target.node if channel.target else None
+                targets.append({
+                    "no_indice": target_node,
+                    "no_nome": node_names[target_node] if target_node is not None and target_node < len(node_names) else None,
+                    "propriedade": target_path
+                })
             data["animacoes"].append({
                 "nome": anim.name or f"Animacao_{i+1}",
                 "canais": len(anim.channels or []),
                 "amostras": len(anim.samplers or []),
                 "duracao_segundos": round(duration, 4) if duration is not None else None,
-                "canais_por_tipo": paths
+                "canais_por_tipo": paths,
+                "nos_alvo_dos_canais": targets
             })
         data["tem_animacao"] = len(data["animacoes"]) > 0
         data["tem_esqueleto"] = len(gltf.skins or []) > 0
