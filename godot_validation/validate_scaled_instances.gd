@@ -118,8 +118,7 @@ func _run() -> void:
             "imported_root_global_transform": _transform_array((model as Node3D).global_transform) if model is Node3D else [],
             "top_level_nodes_before_normalization": top_level_before,
             "wrapper_global_transform_after_offset": _transform_array(wrapper.global_transform),
-            "native_aabb_size": _vec3_array(baseline.size),
-            "top_level_nodes_before_normalization": top_level_before
+            "native_aabb_size": _vec3_array(baseline.size)
         }
         results.append({
             "file": filename,
