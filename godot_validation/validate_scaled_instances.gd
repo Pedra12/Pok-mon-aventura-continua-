@@ -31,51 +31,66 @@ func _run() -> void:
             failures.append(filename + ": cena GLB nao carregada")
             continue
 
-        # Measure the live imported hierarchy first, without a scale wrapper.
-        var baseline_model := packed.instantiate()
-        root.add_child(baseline_model)
+        # Measure and calibrate the SAME imported instance under its final wrapper.
+        var wrapper := Node3D.new()
+        wrapper.name = String(profile["name"]).replace(" ", "_")
+        var model := packed.instantiate()
+        wrapper.add_child(model)
+        root.add_child(wrapper)
         await process_frame
-        var baseline_result := _combined_world_bounds(baseline_model)
+
+        var baseline_result := _combined_world_bounds(model)
         if not baseline_result["valid"]:
             failures.append(filename + ": sem MeshInstance3D com geometria")
-            baseline_model.queue_free()
+            wrapper.queue_free()
             await process_frame
             continue
         var baseline: AABB = baseline_result["aabb"]
         if baseline.size.y <= 0.000001:
             failures.append(filename + ": altura base invalida")
-            baseline_model.queue_free()
+            wrapper.queue_free()
             await process_frame
             continue
 
         var target_height := float(profile["pokedex_height_m"])
         var calibrated_scale := target_height / baseline.size.y
-        var baseline_center := baseline.position + baseline.size * 0.5
-        var calibrated_offset := Vector3(
-            -baseline_center.x * calibrated_scale,
-            -baseline.position.y * calibrated_scale,
-            -baseline_center.z * calibrated_scale
-        )
-        baseline_model.queue_free()
+        wrapper.scale = Vector3.ONE * calibrated_scale
         await process_frame
 
-        var wrapper := Node3D.new()
-        wrapper.name = String(profile["name"]).replace(" ", "_")
-        wrapper.scale = Vector3.ONE * calibrated_scale
-        wrapper.position = calibrated_offset
-        var model := packed.instantiate()
-        wrapper.add_child(model)
-        root.add_child(wrapper)
-        await process_frame
-        var bounds := _combined_world_bounds(model)
-        if not bounds["valid"]:
-            failures.append(filename + ": geometria desapareceu apos calibracao")
+        var scaled_result := _combined_world_bounds(model)
+        if not scaled_result["valid"]:
+            failures.append(filename + ": geometria desapareceu apos escala")
             wrapper.queue_free()
             await process_frame
             continue
+        var scaled_box: AABB = scaled_result["aabb"]
 
-        var box: AABB = bounds["aabb"]
-        var center := box.position + box.size * 0.5
+        # Correct against the measured result, not an offset inferred from another instance.
+        if scaled_box.size.y > 0.000001:
+            var correction := target_height / scaled_box.size.y
+            calibrated_scale *= correction
+            wrapper.scale = Vector3.ONE * calibrated_scale
+            await process_frame
+            scaled_result = _combined_world_bounds(model)
+            scaled_box = scaled_result["aabb"]
+
+        var center := scaled_box.position + scaled_box.size * 0.5
+        var calibrated_offset := Vector3(
+            -center.x,
+            -scaled_box.position.y,
+            -center.z
+        )
+        wrapper.position = calibrated_offset
+        await process_frame
+
+        var final_result := _combined_world_bounds(model)
+        if not final_result["valid"]:
+            failures.append(filename + ": geometria desapareceu apos posicionamento")
+            wrapper.queue_free()
+            await process_frame
+            continue
+        var box: AABB = final_result["aabb"]
+        center = box.position + box.size * 0.5
         var checks := {
             "height_matches_target": abs(box.size.y - target_height) <= HEIGHT_TOLERANCE,
             "bottom_aligned_to_zero": abs(box.position.y) <= POSITION_TOLERANCE,
@@ -102,6 +117,8 @@ func _run() -> void:
             "native_aabb_min": _vec3_array(baseline.position),
             "native_aabb_max": _vec3_array(baseline.end),
             "native_aabb_size": _vec3_array(baseline.size),
+            "scaled_aabb_min_before_offset": _vec3_array(scaled_box.position),
+            "scaled_aabb_max_before_offset": _vec3_array(scaled_box.end),
             "actual_world_min": _vec3_array(box.position),
             "actual_world_max": _vec3_array(box.end),
             "actual_world_size": _vec3_array(box.size),
@@ -122,14 +139,14 @@ func _run() -> void:
         "failures": failures,
         "results": results,
         "recommended_profiles": recommendations,
-        "method": "Mede o AABB nativo da PackedScene instanciada e calcula escala/offset a partir dessa hierarquia real antes de validar uma segunda instancia."
+        "method": "Mede, escala e posiciona a mesma instancia GLB dentro do wrapper final; corrige a escala pela altura medida apos a transformacao e calcula o offset pelo AABB escalado."
     }
     var out := FileAccess.open(OUTPUT_PATH, FileAccess.WRITE)
     if out == null:
         push_error("Nao foi possivel gravar relatorio")
         quit(1)
         return
-    out.store_string(JSON.stringify(output, "\t"))
+    out.store_string(JSON.stringify(output, "\\t"))
     out.close()
     print("SCALED_INSTANCE_VALIDATION=" + JSON.stringify(output))
     quit(0 if failures.is_empty() and results.size() == parsed["pokemon"].size() else 1)
