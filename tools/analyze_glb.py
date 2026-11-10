@@ -20,10 +20,23 @@ def inspect(path):
         data["ossos_por_esqueleto"] = [len(s.joints or []) for s in (gltf.skins or [])]
         data["animacoes"] = []
         for i, anim in enumerate(gltf.animations or []):
+            times = []
+            for sampler in (anim.samplers or []):
+                if sampler.input is not None and sampler.input < len(gltf.accessors):
+                    accessor = gltf.accessors[sampler.input]
+                    if accessor.min and accessor.max:
+                        times.extend([float(accessor.min[0]), float(accessor.max[0])])
+            duration = (max(times) - min(times)) if times else None
+            paths = {}
+            for channel in (anim.channels or []):
+                target_path = channel.target.path if channel.target else "unknown"
+                paths[target_path] = paths.get(target_path, 0) + 1
             data["animacoes"].append({
                 "nome": anim.name or f"Animacao_{i+1}",
                 "canais": len(anim.channels or []),
-                "amostras": len(anim.samplers or [])
+                "amostras": len(anim.samplers or []),
+                "duracao_segundos": round(duration, 4) if duration is not None else None,
+                "canais_por_tipo": paths
             })
         data["tem_animacao"] = len(data["animacoes"]) > 0
         data["tem_esqueleto"] = len(gltf.skins or []) > 0
