@@ -56,6 +56,7 @@ jobs:
         run: godot --headless --path godot_validation --script res://validate_scaled_instances.gd
 
       - name: Analisar superficies horizontais do mapa
+        if: always()
         run: godot --headless --path godot_validation --script res://inspect_map_surfaces.gd
 
       - name: Publicar relatorio de validacao
