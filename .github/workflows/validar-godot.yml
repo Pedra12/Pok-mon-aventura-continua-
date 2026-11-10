@@ -50,7 +50,7 @@ jobs:
       - name: Validar script e cena do laboratorio 3D
         run: godot --headless --path godot_validation --editor --quit
 
-        run: godot --headless --path godot_validation --script res://validate_assets.gd
+      - name: Verificar cenas, malhas, esqueletos e animacoes\n        run: godot --headless --path godot_validation --script res://validate_assets.gd
 
       - name: Auditar cada clipe em cinco pontos e mapear ossos e nos movimentados
         run: godot --headless --path godot_validation --script res://audit_animation_detail.gd
@@ -82,3 +82,4 @@ jobs:
             godot_validation/map_surface_analysis.json
           if-no-files-found: warn
           retention-days: 30
+      - name: Verificar cenas, malhas, esqueletos e animacoes
