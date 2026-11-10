@@ -47,7 +47,7 @@ jobs:
       - name: Importar assets no Godot
         run: godot --headless --editor --path godot_validation --import
 
-      - name: Verificar cenas, malhas, esqueletos e animacoes
+      - name: Validar script e cena do laboratorio 3D\n        run: godot --headless --path godot_validation --editor --quit\n\n      - name: Verificar cenas, malhas, esqueletos e animacoes
         run: godot --headless --path godot_validation --script res://validate_assets.gd
 
       - name: Auditar cada clipe em cinco pontos e mapear ossos e nos movimentados
