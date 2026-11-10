@@ -11,7 +11,7 @@ on:
       - '**.glb'
 
 concurrency:
-  group: validacao-godot-${{ github.ref }}
+  group: validacao-godot-v2-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -20,6 +20,7 @@ permissions:
 jobs:
   validar:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Baixar repositorio
         uses: actions/checkout@v4
