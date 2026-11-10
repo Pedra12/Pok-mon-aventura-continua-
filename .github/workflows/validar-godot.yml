@@ -5,6 +5,8 @@ on:
   push:
     paths:
       - 'godot_validation/**'
+      - 'config/**'
+      - 'tools/validate_scale_profiles.py'
       - '.github/workflows/validar-godot.yml'
       - '**.glb'
 
@@ -42,10 +44,12 @@ jobs:
       - name: Verificar cenas, malhas, esqueletos e animacoes
         run: godot --headless --path godot_validation --script res://validate_assets.gd
 
+      - name: Validar perfis de escala e preservacao do mapa
+        run: python3 tools/validate_scale_profiles.py
+
       - name: Publicar relatorio de validacao
         uses: actions/upload-artifact@v4
         with:
           name: validacao-importacao-godot
-          path: godot_validation/godot_validation_report.json
-          if-no-files-found: error
+          path: |\n            godot_validation/godot_validation_report.json\n            godot_validation/scale_profile_validation.json\n          if-no-files-found: error
           retention-days: 30
