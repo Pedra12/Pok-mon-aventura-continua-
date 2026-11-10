@@ -1,45 +1,45 @@
 {
   "schema_version": 1,
   "units": "Godot units treated as meters for gameplay calibration",
-  "source": "Imported Godot 4.4.1 scene AABBs from run 42886790413; target heights from Pokédex data (PokéAPI).",
-  "formula": "uniform_scale = pokedex_height_m / imported_aabb_size_y; visual_offset = [-center_x, -min_y, -center_z] * uniform_scale",
+  "source": "Caixas locais transformadas corretamente para o espaço global pelo Godot 4.4.1; relatório da execução 42913827272.",
+  "formula": "uniform_scale = pokedex_height_m / imported_aabb_size_y; visual_offset = [-center_x, -min_y, -center_z] * uniform_scale. AABB global calculada com Transform3D * AABB (transformação direta).",
   "application": "Apply to a wrapper Node3D around the imported GLB instance. Do not edit or rescale the original GLB files. Keep original_pokemon_village.glb unchanged.",
-  "warning": "These are first-pass geometric profiles. Validate visually in the map before final gameplay use; AABB height may include wings, accessories, or unusual model geometry.",
+  "warning": "Perfis geometricamente validados no Godot. Modelos com animações devem passar por inspeção visual das poses antes de aprovação final de gameplay.",
   "map_preservation": {
     "file": "original_pokemon_village.glb",
     "modified": false,
     "godot_imported_aabb_min": [
-      -56.3473,
-      -18.6319,
-      -70.7696
+      -56.3472709655762,
+      -2,
+      -39.9287185668945
     ],
     "godot_imported_aabb_max": [
-      297.7931,
-      2,
-      39.9287
+      297.793090820312,
+      18.6319103240967,
+      70.7696304321289
     ],
-    "note": "Do not move, resize, or center the map to compensate for Pokémon model scale. Determine spawn/floor positions separately."
+    "note": "Bounds globais corrigidos usando Transform3D * AABB. O arquivo GLB original permanece inalterado; nao mover nem redimensionar o mapa para compensar escalas de Pokemon."
   },
   "pokemon": {
     "amoonguss.glb": {
       "name": "Amoonguss",
       "pokedex_height_m": 0.6,
       "imported_aabb_min": [
-        -3.4729,
-        -0.0143,
-        -2.6175
+        -3.47286200523376,
+        -0.0143229998648167,
+        -2.61749410629272
       ],
       "imported_aabb_max": [
-        3.4729,
-        5.8847,
-        2.5979
+        3.47286105155945,
+        5.88468599319458,
+        2.5979380607605
       ],
-      "imported_height": 5.899009,
-      "uniform_scale": 0.101712,
+      "imported_height": 5.899008993059397,
+      "uniform_scale": 0.10171199954194723,
       "visual_offset": [
-        0,
-        0.001457,
-        0.000995
+        4.850006050055526e-8,
+        0.0014568209556895465,
+        0.0009945422471077474
       ],
       "rig_status": "has_skeleton_and_animation"
     },
@@ -47,21 +47,21 @@
       "name": "Beedrill",
       "pokedex_height_m": 1,
       "imported_aabb_min": [
-        -38.3669,
-        -58.6814,
-        -63.0072
+        -38.3669166564941,
+        18.4743537902832,
+        -110.02433013916
       ],
       "imported_aabb_max": [
-        38.3669,
-        32.1563,
-        35.3756
+        38.3669242858887,
+        109.312026977539,
+        -11.6415252685547
       ],
-      "imported_height": 90.837677,
-      "uniform_scale": 0.01100865,
+      "imported_height": 90.8376731872558,
+      "uniform_scale": 0.011008648338432962,
       "visual_offset": [
-        0,
-        0.646003,
-        0.152093
+        -4.1994661105953175e-8,
+        -0.20337766415702382,
+        0.6696883084890817
       ],
       "rig_status": "has_skeleton_and_animation"
     },
@@ -69,21 +69,21 @@
       "name": "Diancie",
       "pokedex_height_m": 0.7,
       "imported_aabb_min": [
-        -0.5451,
-        -2.9731,
-        -0.2933
+        -0.545137584209442,
+        1.23722469806671,
+        0.842247128486633
       ],
       "imported_aabb_max": [
-        0.5451,
-        -1.2059,
-        0.3891
+        0.545137584209442,
+        3.00437951087952,
+        1.52464401721954
       ],
-      "imported_height": 1.767155,
-      "uniform_scale": 0.39611691,
+      "imported_height": 1.76715481281281,
+      "uniform_scale": 0.39611696435684557,
       "visual_offset": [
         0,
-        1.177696,
-        -0.018992
+        -0.49008569162550003,
+        -0.4687828678001127
       ],
       "rig_status": "has_skeleton_and_animation"
     },
@@ -91,21 +91,21 @@
       "name": "Eevee",
       "pokedex_height_m": 0.3,
       "imported_aabb_min": [
-        416.0296,
-        -326.3797,
-        -2409.8638
+        135.954681396484,
+        37.739673614502,
+        -78.1158218383789
       ],
       "imported_aabb_max": [
-        3145.7429,
-        2236.0449,
-        86.6733
+        334.362579345703,
+        179.099334716797,
+        78.2748641967773
       ],
-      "imported_height": 2562.424591,
-      "uniform_scale": 0.000117076616,
+      "imported_height": 141.35966110229498,
+      "uniform_scale": 0.0021222461744790466,
       "visual_offset": [
-        -0.2085,
-        0.038211,
-        0.135996
+        -0.49906450370078537,
+        -0.0800928779544647,
+        -0.00016876351834555948
       ],
       "rig_status": "no_skeleton_detected_needs_rig"
     },
@@ -113,21 +113,21 @@
       "name": "Flygon",
       "pokedex_height_m": 2,
       "imported_aabb_min": [
-        -1.16,
-        -0.4721,
-        -1.3843
+        -1.16002869606018,
+        -0.472130954265594,
+        -1.38433349132538
       ],
       "imported_aabb_max": [
-        1.16,
-        1.3638,
-        0.3358
+        1.16002869606018,
+        1.36383414268494,
+        0.335763335227966
       ],
-      "imported_height": 1.835965,
-      "uniform_scale": 1.08934522,
+      "imported_height": 1.8359650969505341,
+      "uniform_scale": 1.0893453276001388,
       "visual_offset": [
         0,
-        0.514314,
-        0.571128
+        0.5143136490446196,
+        0.571127500102833
       ],
       "rig_status": "has_skeleton_and_16_clips"
     },
@@ -135,21 +135,21 @@
       "name": "Hisuian Voltorb",
       "pokedex_height_m": 0.5,
       "imported_aabb_min": [
-        -0.01,
-        0.0001,
-        -0.0111
+        -0.00999009888619184,
+        0.000110814900835976,
+        -0.0110759399831295
       ],
       "imported_aabb_max": [
-        0.01,
-        0.0198,
-        0.01
+        0.00999009888619184,
+        0.0198330283164978,
+        0.00999034475535154
       ],
-      "imported_height": 0.019722,
-      "uniform_scale": 25.352124,
+      "imported_height": 0.019722213415661823,
+      "uniform_scale": 25.35212399653578,
       "visual_offset": [
         0,
-        -0.002809,
-        0.013761
+        -0.00280939310665748,
+        0.013761072412337169
       ],
       "rig_status": "has_skeleton_and_animation"
     },
@@ -157,21 +157,21 @@
       "name": "Ho-Oh",
       "pokedex_height_m": 3.8,
       "imported_aabb_min": [
-        -359.108,
-        -17.7463,
-        -317.536
+        -359.108001708984,
+        -17.7463130950928,
+        -317.535980224609
       ],
       "imported_aabb_max": [
-        359.108,
-        271.178,
-        292.465
+        359.108001708984,
+        271.178039550781,
+        292.465026855469
       ],
-      "imported_height": 288.924353,
-      "uniform_scale": 0.01315223,
+      "imported_height": 288.9243526458738,
+      "uniform_scale": 0.013152231596959049,
       "visual_offset": [
         0,
-        0.233404,
-        0.164869
+        0.23340361981880764,
+        0.164869492533745
       ],
       "rig_status": "has_skeleton_and_animation"
     },
@@ -179,20 +179,20 @@
       "name": "Lucario",
       "pokedex_height_m": 1.2,
       "imported_aabb_min": [
-        -1.4821,
-        -1.866,
-        -1.4821
+        -1.48213195800781,
+        -0.0105419997125864,
+        -1.48213195800781
       ],
       "imported_aabb_max": [
-        1.4821,
-        0.0105,
-        1.4821
+        1.48213195800781,
+        1.86596703529358,
+        1.48213195800781
       ],
-      "imported_height": 1.876509,
-      "uniform_scale": 0.63948534,
+      "imported_height": 1.8765090350061664,
+      "uniform_scale": 0.6394853302670385,
       "visual_offset": [
         0,
-        1.193259,
+        0.006741454167878338,
         0
       ],
       "rig_status": "no_skeleton_detected_needs_rig"
@@ -201,21 +201,21 @@
       "name": "Magnemite",
       "pokedex_height_m": 0.3,
       "imported_aabb_min": [
-        -2.7909,
-        -1,
-        -0.8197
+        -2.79086542129517,
+        -1.57542681694031,
+        -1.00000011920929
       ],
       "imported_aabb_max": [
-        2.7909,
-        1.2116,
-        1.5699
+        2.79086542129517,
+        1.07909440994263,
+        1.39967942237854
       ],
-      "imported_height": 2.211646,
-      "uniform_scale": 0.1356456,
+      "imported_height": 2.65452122688294,
+      "uniform_scale": 0.11301473009966234,
       "visual_offset": [
         0,
-        0.135645,
-        -0.050878
+        0.17804643650827928,
+        -0.022584824287046956
       ],
       "rig_status": "has_skeleton_and_animation"
     },
@@ -223,21 +223,21 @@
       "name": "Mew",
       "pokedex_height_m": 0.4,
       "imported_aabb_min": [
-        32.2524,
-        3.7141,
-        29.6444
+        -32.2523994445801,
+        -29.6443996429443,
+        22.336799621582
       ],
       "imported_aabb_max": [
-        97.4997,
-        63.7459,
-        71.0535
+        32.9948997497559,
+        30.3873996734619,
+        63.7458992004395
       ],
-      "imported_height": 60.031799,
-      "uniform_scale": 0.006663135,
+      "imported_height": 60.0317993164062,
+      "uniform_scale": 0.0066631352808824325,
       "visual_offset": [
-        -0.432278,
-        -0.024748,
-        -0.335482
+        -0.0024736899897414314,
+        0.19752464514148074,
+        -0.286790333797294
       ],
       "rig_status": "no_skeleton_detected_needs_rig"
     },
@@ -245,21 +245,21 @@
       "name": "Celebi",
       "pokedex_height_m": 0.6,
       "imported_aabb_min": [
-        -6.6922,
-        -5.0346,
-        -15.5334
+        -6.69216299057007,
+        -2.33286929130554,
+        0.0400055535137653
       ],
       "imported_aabb_max": [
-        6.6922,
-        2.3329,
-        -0.04
+        6.69216299057007,
+        5.03459739685059,
+        15.5334300994873
       ],
-      "imported_height": 7.367467,
-      "uniform_scale": 0.08143912,
+      "imported_height": 7.367466688156131,
+      "uniform_scale": 0.08143911949606156,
       "visual_offset": [
         0,
-        0.410013,
-        0.634143
+        0.18998682098332434,
+        -0.6341434435544896
       ],
       "rig_status": "has_skeleton_and_animation"
     },
@@ -267,21 +267,21 @@
       "name": "Metagross",
       "pokedex_height_m": 1.6,
       "imported_aabb_min": [
-        -0.9407,
-        -1.176,
-        -0.9699
+        -1.06604242324829,
+        2.15952205657959,
+        -1.31840491294861
       ],
       "imported_aabb_max": [
-        0.8437,
-        0.2986,
-        0.7399
+        0.864897727966309,
+        3.47262597084045,
+        1.20431470870972
       ],
-      "imported_height": 1.47461,
-      "uniform_scale": 1.08503241,
+      "imported_height": 1.3131039142608603,
+      "uniform_scale": 1.218486962549824,
       "visual_offset": [
-        0.052596,
-        1.275975,
-        0.124804
+        0.12254609439357539,
+        -2.6313494712810135,
+        0.0695087132098671
       ],
       "rig_status": "node_part_animation_no_skeleton"
     },
@@ -289,21 +289,21 @@
       "name": "Smoliv",
       "pokedex_height_m": 0.3,
       "imported_aabb_min": [
-        -1.3256,
-        -1.3143,
-        -0.3316
+        -1.32584202289581,
+        -0.405647754669189,
+        -4.29538154602051
       ],
       "imported_aabb_max": [
-        1.3229,
-        1.2346,
-        3.4678
+        1.322634100914,
+        2.14323043823242,
+        -0.496012687683105
       ],
-      "imported_height": 2.548878,
-      "uniform_scale": 0.11769884,
+      "imported_height": 2.548878192901609,
+      "uniform_scale": 0.11769883740834393,
       "visual_offset": [
-        0.000161,
-        0.154692,
-        -0.184562
+        0.00018878434387786507,
+        0.04774426912186867,
+        0.2819707654359792
       ],
       "rig_status": "has_skeleton_and_3_active_clips"
     },
@@ -311,21 +311,21 @@
       "name": "Squirtle",
       "pokedex_height_m": 0.5,
       "imported_aabb_min": [
-        -0.2127,
-        0.0009,
-        -0.3509
+        -0.212662562727928,
+        0.000896282203029841,
+        -0.350919783115387
       ],
       "imported_aabb_max": [
-        0.2127,
-        0.5323,
-        0.1912
+        0.212662592530251,
+        0.532255530357361,
+        0.191164314746857
       ],
-      "imported_height": 0.531359,
-      "uniform_scale": 0.94098296,
+      "imported_height": 0.5313592481543311,
+      "uniform_scale": 0.9409829634785561,
       "visual_offset": [
-        0,
-        -0.000843,
-        0.075164
+        -1.402173910675119e-8,
+        -0.0008433862835201087,
+        0.07516358702866206
       ],
       "rig_status": "has_skeleton_and_2_idle_clips"
     }
