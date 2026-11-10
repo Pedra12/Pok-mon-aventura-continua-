@@ -232,3 +232,23 @@ O teste compara apenas dois instantes (início e metade), então não avalia con
 ### Próxima verificação
 
 Foi ampliado o verificador para comparar também transformações de todos os nós 3D, além dos ossos. Isso deve esclarecer se os clipes do Metagross e os dois clipes do Smoliv animam objetos ou peças. A nova execução está separada e ainda precisa terminar.
+
+
+## Sexta passagem: nomes reais dos ossos e alvos das animações
+
+**Execução:** [42886285312](https://github.com/Pedra12/Pok-mon-aventura-continua-/actions/runs/42886285312)  
+**Resultado:** sucesso
+
+O relatório JSON agora inclui a hierarquia dos nós, a lista ordenada de ossos de cada skin e o nome do nó/propriedade atingido por cada canal de animação.
+
+### Exemplos úteis para a implementação
+
+- **Flygon:** a hierarquia identifica quadris, coxas, pernas, pés, dedos, cauda, coluna, ombros, braços e mãos. Os clipes de caminhada e corrida apontam para articulações dessas regiões.
+- **Squirtle:** possui pelve, coluna, pescoço, clavículas, braços, mãos, dedos, cabeça, coxas, panturrilhas, pés e cauda. Os dois clipes disponíveis são nomeados como Idle.
+- **Smoliv:** os canais controlam as pernas, o osso mestre e o nó Moving Controller. Os clipes sem mudança óssea podem animar controladores ou nós.
+- **Metagross:** o clipe Animation aponta para nós de malha Sphere.006_0, Sphere.011_1, Sphere.012_2 e Sphere.013_3, com canais de translation, rotation e scale. É uma animação de nós/peças, não um rig esquelético.
+- **Eevee, Lucario e Mew:** continuam sem skin declarada. A criação de rig deverá respeitar a anatomia e as proporções individuais.
+
+### Implicação para o rigging
+
+Não será aplicado um rig humanoide genérico indiscriminadamente. Squirtle e Flygon têm estruturas diferentes; criaturas com asas, caudas, corpos esféricos ou múltiplos apêndices precisam de hierarquias e controladores específicos. Os nomes dos ossos serão referência, mas o encaixe final depende da inspeção das malhas e dos pesos de influência.
