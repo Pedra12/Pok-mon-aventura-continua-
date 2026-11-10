@@ -53,12 +53,12 @@ func _run() -> void:
 		var profile: Dictionary = lab._get_profile(file_name)
 		var expected_scale := float(profile.get("uniform_scale", 1.0))
 		var expected_offset: Array = profile.get("visual_offset", [0.0, 0.0, 0.0])
-		var actual_scale := lab.current_model.scale.x
+		var actual_scale := lab.current_wrapper.scale.x
 		model_result.scale = actual_scale
 		model_result.position = [
-			lab.current_model.position.x,
-			lab.current_model.position.y,
-			lab.current_model.position.z
+			lab.current_wrapper.position.x,
+			lab.current_wrapper.position.y,
+			lab.current_wrapper.position.z
 		]
 		if absf(actual_scale - expected_scale) > 0.0001:
 			model_result.errors.append("Escala divergente: esperado %.8f, recebido %.8f" % [expected_scale, actual_scale])
