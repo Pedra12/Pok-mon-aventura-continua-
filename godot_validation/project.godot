@@ -2,8 +2,8 @@
 config_version=5
 
 [application]
-config/name="Auditoria 3D de Assets"
-run/main_scene=""
+config/name="Laboratorio 3D Pokémon"
+run/main_scene="res://animation_lab.tscn"
 
 [rendering]
 renderer/rendering_method="gl_compatibility"
