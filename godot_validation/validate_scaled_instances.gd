@@ -95,7 +95,8 @@ func _run() -> void:
     print("SCALED_INSTANCE_VALIDATION=" + JSON.stringify({
         "tested": output["profiles_tested"],
         "passed": output["profiles_passed"],
-        "failures": failures
+        "failures": failures,
+        "results": results
     }))
     quit(0 if failures.is_empty() and results.size() == parsed["pokemon"].size() else 1)
 
