@@ -16,6 +16,7 @@ const MODEL_LABELS := [
 const PROFILE_PATH := "res://config/pokemon_scale_profiles.json"
 
 var current_model: Node3D
+var current_wrapper: Node3D
 var current_player: AnimationPlayer
 var current_file := "flygon_go_fest_2021.glb"
 var orbit_yaw := 0.0
@@ -123,31 +124,37 @@ func _setup_ui() -> void:
  box.add_child(help)
 
 func _load_model(file_name: String) -> void:
- if current_model:
-  current_model.queue_free()
+ if current_wrapper:
+  current_wrapper.queue_free()
+ current_model = null
+ current_wrapper = null
  current_player = null
  current_file = file_name
  var scene := load("res://assets/" + file_name) as PackedScene
  if scene == null:
   status_label.text = "Falha ao carregar: " + file_name
   return
- current_model = scene.instantiate() as Node3D
- if current_model == null:
+ var instance := scene.instantiate() as Node3D
+ if instance == null:
   status_label.text = "GLB não instanciou como Node3D."
   return
- current_model.name = "PokemonPreview"
- add_child(current_model)
+ current_wrapper = Node3D.new()
+ current_wrapper.name = "PokemonPreviewWrapper"
+ instance.name = "PokemonPreview"
+ current_wrapper.add_child(instance)
+ add_child(current_wrapper)
+ current_model = instance
  var profile := _get_profile(file_name)
  var scale_value := float(profile.get("uniform_scale", profile.get("scale", 1.0)))
  var height_m := float(profile.get("pokedex_height_m", 1.0))
  camera_target_y = height_m * 0.5
  orbit_distance = max(2.8, height_m * 2.6)
- current_model.scale = Vector3.ONE * scale_value
+ current_wrapper.scale = Vector3.ONE * scale_value
  var offset_data: Array = profile.get("visual_offset", [0.0, 0.0, 0.0])
  if offset_data.size() == 3:
-  current_model.position = Vector3(float(offset_data[0]), float(offset_data[1]), float(offset_data[2]))
+  current_wrapper.position = Vector3(float(offset_data[0]), float(offset_data[1]), float(offset_data[2]))
  else:
-  current_model.position = Vector3.ZERO
+  current_wrapper.position = Vector3.ZERO
  current_player = _find_animation_player(current_model)
  _populate_clips()
  _update_camera()
