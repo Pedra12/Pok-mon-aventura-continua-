@@ -123,7 +123,7 @@ func _collect_surfaces(node: Node, result: Array) -> void:
                         other_count += 1
 
                 var local_aabb := mesh_instance.get_aabb()
-                var world_aabb := local_aabb * mesh_instance.global_transform
+                var world_aabb := mesh_instance.global_transform * local_aabb
                 var material := mesh.surface_get_material(surface_index)
                 var material_info: Dictionary = {}
                 if material != null:
