@@ -51,5 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: validacao-importacao-godot
-          path: |\n            godot_validation/godot_validation_report.json\n            godot_validation/scale_profile_validation.json\n          if-no-files-found: error
+          path: |
+            godot_validation/godot_validation_report.json
+            godot_validation/scale_profile_validation.json\n          if-no-files-found: error
           retention-days: 30
