@@ -228,7 +228,7 @@ func _update_camera() -> void:
  camera.position = target + Vector3(
   sin(orbit_yaw) * cos(orbit_pitch),
   sin(orbit_pitch),
-  cos(orbit_yaw) * cos(orbit_pitch
+  cos(orbit_yaw) * cos(orbit_pitch)
  ) * orbit_distance
  camera.look_at(target, Vector3.UP)
 
