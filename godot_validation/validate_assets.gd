@@ -30,6 +30,7 @@ func _run_validation() -> void:
             "loaded": false,
             "node_count": 0,
             "mesh_instances": 0,
+            "mesh_bounds": [],
             "skeletons": [],
             "animation_players": [],
             "errors": []
@@ -50,6 +51,10 @@ func _run_validation() -> void:
 
         root.add_child(instance)
         entry["loaded"] = true
+        if instance is Node3D:
+            var root_3d := instance as Node3D
+            entry["root_origin"] = _vec3_array(root_3d.global_position)
+            entry["root_scale"] = _vec3_array(root_3d.global_basis.get_scale())
         var skeletons: Array[Skeleton3D] = []
         var spatial_nodes: Array[Node3D] = []
         _collect_skeletons(instance, skeletons)
@@ -87,6 +92,9 @@ func _run_validation() -> void:
     output.close()
     print("GODOT_VALIDATION_RESULT=" + JSON.stringify(report["summary"]))
     quit(0 if failures.is_empty() else 1)
+
+func _vec3_array(value: Vector3) -> Array:
+    return [value.x, value.y, value.z]
 
 func _collect_skeletons(node: Node, result: Array[Skeleton3D]) -> void:
     if node is Skeleton3D:
@@ -129,6 +137,18 @@ func _inspect_node(node: Node, entry: Dictionary, skeletons: Array[Skeleton3D], 
     entry["node_count"] += 1
     if node is MeshInstance3D:
         entry["mesh_instances"] += 1
+        var mesh_instance := node as MeshInstance3D
+        var local_bounds := mesh_instance.get_aabb()
+        var world_bounds := local_bounds * mesh_instance.global_transform
+        entry["mesh_bounds"].append({
+            "node_path": str(mesh_instance.get_path()),
+            "local_min": _vec3_array(local_bounds.position),
+            "local_max": _vec3_array(local_bounds.end),
+            "local_size": _vec3_array(local_bounds.size),
+            "world_min": _vec3_array(world_bounds.position),
+            "world_max": _vec3_array(world_bounds.end),
+            "world_size": _vec3_array(world_bounds.size)
+        })
     if node is Skeleton3D:
         var skeleton := node as Skeleton3D
         entry["skeletons"].append({
