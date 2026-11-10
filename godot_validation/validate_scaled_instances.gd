@@ -23,6 +23,7 @@ func _run() -> void:
 
     var results: Array = []
     var failures: Array[String] = []
+    var recommendations: Dictionary = {}
     for filename in parsed["pokemon"]:
         var profile: Dictionary = parsed["pokemon"][filename]
         var packed := load("res://assets/" + filename) as PackedScene
@@ -30,26 +31,51 @@ func _run() -> void:
             failures.append(filename + ": cena GLB nao carregada")
             continue
 
+        # Measure the live imported hierarchy first, without a scale wrapper.
+        var baseline_model := packed.instantiate()
+        root.add_child(baseline_model)
+        await process_frame
+        var baseline_result := _combined_world_bounds(baseline_model)
+        if not baseline_result["valid"]:
+            failures.append(filename + ": sem MeshInstance3D com geometria")
+            baseline_model.queue_free()
+            await process_frame
+            continue
+        var baseline: AABB = baseline_result["aabb"]
+        if baseline.size.y <= 0.000001:
+            failures.append(filename + ": altura base invalida")
+            baseline_model.queue_free()
+            await process_frame
+            continue
+
+        var target_height := float(profile["pokedex_height_m"])
+        var calibrated_scale := target_height / baseline.size.y
+        var baseline_center := baseline.position + baseline.size * 0.5
+        var calibrated_offset := Vector3(
+            -baseline_center.x * calibrated_scale,
+            -baseline.position.y * calibrated_scale,
+            -baseline_center.z * calibrated_scale
+        )
+        baseline_model.queue_free()
+        await process_frame
+
         var wrapper := Node3D.new()
         wrapper.name = String(profile["name"]).replace(" ", "_")
-        wrapper.scale = Vector3.ONE * float(profile["uniform_scale"])
-        var offset: Array = profile["visual_offset"]
-        wrapper.position = Vector3(float(offset[0]), float(offset[1]), float(offset[2]))
+        wrapper.scale = Vector3.ONE * calibrated_scale
+        wrapper.position = calibrated_offset
         var model := packed.instantiate()
         wrapper.add_child(model)
         root.add_child(wrapper)
         await process_frame
-
         var bounds := _combined_world_bounds(model)
         if not bounds["valid"]:
-            failures.append(filename + ": sem MeshInstance3D com geometria")
+            failures.append(filename + ": geometria desapareceu apos calibracao")
             wrapper.queue_free()
             await process_frame
             continue
 
         var box: AABB = bounds["aabb"]
         var center := box.position + box.size * 0.5
-        var target_height := float(profile["pokedex_height_m"])
         var checks := {
             "height_matches_target": abs(box.size.y - target_height) <= HEIGHT_TOLERANCE,
             "bottom_aligned_to_zero": abs(box.position.y) <= POSITION_TOLERANCE,
@@ -62,16 +88,28 @@ func _run() -> void:
                 passed = false
         if not passed:
             failures.append(filename + ": " + JSON.stringify(checks))
+
+        recommendations[filename] = {
+            "uniform_scale": calibrated_scale,
+            "visual_offset": _vec3_array(calibrated_offset),
+            "native_aabb_min": _vec3_array(baseline.position),
+            "native_aabb_max": _vec3_array(baseline.end),
+            "native_aabb_size": _vec3_array(baseline.size)
+        }
         results.append({
             "file": filename,
             "name": profile["name"],
+            "native_aabb_min": _vec3_array(baseline.position),
+            "native_aabb_max": _vec3_array(baseline.end),
+            "native_aabb_size": _vec3_array(baseline.size),
             "actual_world_min": _vec3_array(box.position),
             "actual_world_max": _vec3_array(box.end),
             "actual_world_size": _vec3_array(box.size),
             "target_height": target_height,
-            "wrapper_scale": float(profile["uniform_scale"]),
-            "wrapper_position": offset,
-            "debug_wrapper_global_transform": str(wrapper.global_transform),
+            "calibrated_scale": calibrated_scale,
+            "calibrated_offset": _vec3_array(calibrated_offset),
+            "previous_scale": float(profile["uniform_scale"]),
+            "previous_offset": profile["visual_offset"],
             "checks": checks,
             "passed": passed
         })
@@ -83,7 +121,8 @@ func _run() -> void:
         "profiles_passed": results.filter(func(item): return item["passed"]).size(),
         "failures": failures,
         "results": results,
-        "method": "Instancia cada GLB dentro de um Node3D wrapper com escala e posicao do perfil; mede AABB global apos transformacao."
+        "recommended_profiles": recommendations,
+        "method": "Mede o AABB nativo da PackedScene instanciada e calcula escala/offset a partir dessa hierarquia real antes de validar uma segunda instancia."
     }
     var out := FileAccess.open(OUTPUT_PATH, FileAccess.WRITE)
     if out == null:
@@ -92,12 +131,7 @@ func _run() -> void:
         return
     out.store_string(JSON.stringify(output, "\t"))
     out.close()
-    print("SCALED_INSTANCE_VALIDATION=" + JSON.stringify({
-        "tested": output["profiles_tested"],
-        "passed": output["profiles_passed"],
-        "failures": failures,
-        "results": results
-    }))
+    print("SCALED_INSTANCE_VALIDATION=" + JSON.stringify(output))
     quit(0 if failures.is_empty() and results.size() == parsed["pokemon"].size() else 1)
 
 func _combined_world_bounds(node: Node) -> Dictionary:
