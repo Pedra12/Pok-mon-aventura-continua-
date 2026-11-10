@@ -27,7 +27,7 @@ func _run() -> void:
         if not filename.to_lower().ends_with(".glb"):
             continue
         total_models += 1
-        var item := _inspect_asset(filename)
+        var item: Dictionary = await _inspect_asset(filename)
         report["assets"].append(item)
         if not item["loaded"]:
             failures.append(filename)
