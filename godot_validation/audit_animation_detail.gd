@@ -62,6 +62,7 @@ func _inspect_asset(filename: String) -> Dictionary:
         "loaded": false,
         "skeletons": [],
         "animation_players": [],
+        "skin_meshes": [],
         "errors": []
     }
     var path := ASSET_DIR.path_join(filename)
@@ -77,6 +78,7 @@ func _inspect_asset(filename: String) -> Dictionary:
     await process_frame
     _stop_animations(instance)
     await process_frame
+    _inspect_skin_meshes(instance, entry)
     var skeletons: Array[Skeleton3D] = []
     _collect_skeletons(instance, skeletons)
     for skeleton in skeletons:
@@ -159,6 +161,69 @@ func _inspect_asset(filename: String) -> Dictionary:
     instance.queue_free()
     await process_frame
     return entry
+
+func _inspect_skin_meshes(node: Node, entry: Dictionary) -> void:
+    if node is MeshInstance3D:
+        var mesh_instance := node as MeshInstance3D
+        var mesh := mesh_instance.mesh
+        if mesh != null:
+            var surface_reports: Array = []
+            for surface_index in range(mesh.get_surface_count()):
+                var arrays := mesh.surface_get_arrays(surface_index)
+                var bones := arrays[Mesh.ARRAY_BONES] as PackedInt32Array
+                var weights := arrays[Mesh.ARRAY_WEIGHTS] as PackedFloat32Array
+                var vertices := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+                var vertex_count := vertices.size()
+                var weighted_vertices := 0
+                var max_influences := 0
+                var used_bones: Dictionary = {}
+                var weight_sum_min := 999999.0
+                var weight_sum_max := 0.0
+                var influences_per_vertex := 0
+                if vertex_count > 0 and not bones.is_empty() and not weights.is_empty():
+                    influences_per_vertex = int(bones.size() / vertex_count)
+                    for vertex_index in range(vertex_count):
+                        var sum_weights := 0.0
+                        var active_influences := 0
+                        for influence in range(influences_per_vertex):
+                            var offset := vertex_index * influences_per_vertex + influence
+                            if offset >= bones.size() or offset >= weights.size():
+                                continue
+                            var weight := float(weights[offset])
+                            if weight > EPSILON:
+                                active_influences += 1
+                                sum_weights += weight
+                                used_bones[int(bones[offset])] = true
+                        if active_influences > 0:
+                            weighted_vertices += 1
+                            weight_sum_min = minf(weight_sum_min, sum_weights)
+                            weight_sum_max = maxf(weight_sum_max, sum_weights)
+                        max_influences = maxi(max_influences, active_influences)
+                var bone_indices: Array = used_bones.keys()
+                bone_indices.sort()
+                surface_reports.append({
+                    "surface": surface_index,
+                    "vertex_count": vertex_count,
+                    "influences_per_vertex_slot": influences_per_vertex,
+                    "bone_index_array_size": bones.size(),
+                    "weight_array_size": weights.size(),
+                    "weighted_vertices": weighted_vertices,
+                    "unweighted_vertices": vertex_count - weighted_vertices,
+                    "max_active_influences_per_vertex": max_influences,
+                    "used_bone_indices": bone_indices,
+                    "weight_sum_min": 0.0 if weighted_vertices == 0 else weight_sum_min,
+                    "weight_sum_max": weight_sum_max
+                })
+            entry["skin_meshes"].append({
+                "node_path": str(mesh_instance.get_path()),
+                "mesh_name": mesh.resource_name,
+                "skeleton_path": str(mesh_instance.skeleton),
+                "skin_resource_present": mesh_instance.skin != null,
+                "surface_count": mesh.get_surface_count(),
+                "surfaces": surface_reports
+            })
+    for child in node.get_children():
+        _inspect_skin_meshes(child, entry)
 
 func _capture_pose(instance: Node, skeletons: Array[Skeleton3D]) -> Dictionary:
     var bones: Dictionary = {}
