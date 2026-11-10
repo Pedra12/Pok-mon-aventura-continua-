@@ -20,7 +20,8 @@ var current_player: AnimationPlayer
 var current_file := "flygon_go_fest_2021.glb"
 var orbit_yaw := 0.0
 var orbit_pitch := -0.18
-var orbit_distance := 5.0
+var orbit_distance := 3.0
+var camera_target_y := 0.5
 var dragging := false
 var last_pointer := Vector2.ZERO
 var speed_value := 1.0
@@ -138,6 +139,9 @@ func _load_model(file_name: String) -> void:
  add_child(current_model)
  var profile := _get_profile(file_name)
  var scale_value := float(profile.get("uniform_scale", profile.get("scale", 1.0)))
+ var height_m := float(profile.get("pokedex_height_m", 1.0))
+ camera_target_y = height_m * 0.5
+ orbit_distance = max(2.8, height_m * 2.6)
  current_model.scale = Vector3.ONE * scale_value
  var offset_data: Array = profile.get("visual_offset", [0.0, 0.0, 0.0])
  if offset_data.size() == 3:
@@ -228,7 +232,7 @@ func _update_camera() -> void:
  var camera := get_node_or_null("LabCamera") as Camera3D
  if camera == null:
   return
- var target := Vector3(0, 1.0, 0)
+ var target := Vector3(0, camera_target_y, 0)
  camera.position = target + Vector3(
   sin(orbit_yaw) * cos(orbit_pitch),
   sin(orbit_pitch),
