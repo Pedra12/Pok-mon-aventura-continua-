@@ -38,6 +38,9 @@ func _run() -> void:
         wrapper.add_child(model)
         root.add_child(wrapper)
         await process_frame
+        _stop_animations_recursively(model)
+        await process_frame
+        _force_update_recursive(wrapper)
         var top_level_before: Array = []
         _collect_top_level_nodes(model, top_level_before)
         _disable_top_level_recursively(model)
@@ -166,6 +169,13 @@ func _run() -> void:
     print("SCALED_INSTANCE_VALIDATION=" + JSON.stringify(output))
     quit(0 if failures.is_empty() and results.size() == parsed["pokemon"].size() else 1)
 
+
+
+func _stop_animations_recursively(node: Node) -> void:
+    if node is AnimationPlayer:
+        (node as AnimationPlayer).stop()
+    for child in node.get_children():
+        _stop_animations_recursively(child)
 
 func _force_update_recursive(node: Node) -> void:
     if node is Node3D:
