@@ -40,3 +40,41 @@ Nenhum desses três modelos deve receber animações de gameplay até passar por
 6. validação visual em cena com câmera, chão e escala de referência.
 
 Não altere o mapa, os GLBs originais nem os perfis de escala para compensar problemas de rigging. Trabalhar em cópias derivadas versionadas dos modelos.
+
+
+## Auditoria objetiva de skinning (execução 42919177031)
+
+Relatório gerado pelo Godot 4.4.1 em [42919177031](https://github.com/Pedra12/Pok-mon-aventura-continua-/actions/runs/42919177031), com inspeção de `ARRAY_BONES`, `ARRAY_WEIGHTS` e vértices por superfície. Os pesos foram analisados numericamente; isso comprova vínculo técnico, mas não comprova deformação visual perfeita.
+
+| Modelo | Malhas com skin | Vértices examinados | Vértices sem peso | Máx. influências ativas/vértice | Resultado |
+|---|---:|---:|---:|---:|---|
+| Amoonguss | 1 | 602 | 0 | 2 | Skin válido numericamente |
+| Beedrill | 2 | 6.550 | 0 | 2 | Skin válido numericamente |
+| Diancie | 6 | 6.213 | 0 | 4 | Skin válido numericamente |
+| Flygon | 3 | 4.216 | 0 | 4 | Skin válido numericamente |
+| Hisuian Voltorb | 2 | 1.748 | 0 | 1 | Skin válido; influência rígida |
+| Ho-Oh | 4 | 21.569 | 0 | 4 | Skin válido numericamente |
+| Magnemite | 2 | 616 | 0 | 1 | Skin válido; influência rígida |
+| Celebi | 5 | 2.711 | 0 | 3 | Skin válido numericamente |
+| Smoliv | 6 | 21.485 | 0 | 1 | Skin válido; influência rígida |
+| Squirtle | 4 | 3.136 | 0 | 4 | Skin válido numericamente |
+| Eevee | 0 | 0 | — | — | Sem Skeleton3D/skin |
+| Lucario | 0 | 0 | — | — | Sem Skeleton3D/skin |
+| Mew | 0 | 0 | — | — | Sem Skeleton3D/skin |
+
+Em todas as superfícies listadas com skin, a soma mínima e máxima dos pesos por vértice ficou aproximadamente entre 0,99994 e 1,00000 (ou exatamente 1,0 nos modelos com influência única). Nenhum vértice foi classificado como sem peso. Isso é um bom sinal para a integridade dos dados de skinning, mas não substitui inspeção visual de articulações, orientações dos ossos e deformações em poses extremas.
+
+O relatório detalhado encontrou **29 clipes**, com **26 clipes apresentando mudança de pose esquelética** e **22 clipes apresentando movimento de nós** durante amostragem em cinco instantes (0%, 25%, 50%, 75% e 99%). Esses números descrevem movimento detectado, não a função semântica do clipe: nomes como idle/walk/run são pistas, mas cada animação ainda precisa ser visualmente conferida antes de ser atribuída a um estado de gameplay.
+
+### Próximas prioridades técnicas
+
+1. **Flygon:** começar pela inspeção visual dos 16 clipes já existentes e mapear quais servem a repouso, locomoção, voo, dano e reações. Não renomear nem atribuir funções finais sem assistir aos clipes.
+2. **Squirtle:** comparar visualmente os dois clipes Idle e testar a deformação do corpo, membros e cauda.
+3. **Amoonguss, Beedrill, Ho-Oh e Celebi:** validar os clipes existentes e criar estados ausentes aproveitando os rigs e pesos atuais.
+4. **Magnemite e Smoliv:** usar movimentos por ossos/nós compatíveis com suas estruturas simples; evitar exigir articulações que os modelos não possuem.
+5. **Eevee, Lucario e Mew:** criar rigs próprios em cópias derivadas; não aplicar clipes de outros Pokémon.
+6. **Metagross:** preservar a animação por nós já existente e validar os pivôs das peças.
+
+### Limite desta validação
+
+O workflow importa e inspeciona os GLBs em modo headless. Não renderiza uma sessão visual de cada Pokémon nem certifica qualidade artística, clipping, contato dos pés com o chão ou naturalidade da animação. A próxima etapa precisa gerar cenas de teste/turntables e revisar cada clipe visualmente. O mapa original e os perfis de escala permanecem intocados.
