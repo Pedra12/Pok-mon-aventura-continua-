@@ -50,6 +50,9 @@ jobs:
       - name: Validar script e cena do laboratorio 3D
         run: godot --headless --path godot_validation --editor --quit
 
+      - name: Testar laboratorio em runtime com todos os modelos e clipes
+        run: godot --headless --path godot_validation --script res://lab_smoke_test.gd
+
       - name: Verificar cenas, malhas, esqueletos e animacoes
         run: godot --headless --path godot_validation --script res://validate_assets.gd
 
@@ -78,6 +81,7 @@ jobs:
             godot_validation/godot_validation_report.json
             godot_validation/animation_detail_report.json
             godot_validation/animation_playback_smoke_report.json
+            godot_validation/lab_smoke_test_report.json
             godot_validation/scale_profile_validation.json
             godot_validation/scaled_instance_validation.json
             godot_validation/map_surface_analysis.json
