@@ -100,6 +100,8 @@ func _run() -> void:
         center = box.position + box.size * 0.5
         var checks := {
             "height_matches_target": abs(box.size.y - target_height) <= HEIGHT_TOLERANCE,
+            "configured_scale_matches_calibration": abs(float(profile["uniform_scale"]) - calibrated_scale) <= maxf(0.00000001, abs(calibrated_scale) * 0.002),
+            "configured_offset_matches_calibration": Vector3(profile["visual_offset"][0], profile["visual_offset"][1], profile["visual_offset"][2]).distance_to(calibrated_offset) <= POSITION_TOLERANCE,
             "bottom_aligned_to_zero": abs(box.position.y) <= POSITION_TOLERANCE,
             "centered_x": abs(center.x) <= POSITION_TOLERANCE,
             "centered_z": abs(center.z) <= POSITION_TOLERANCE
