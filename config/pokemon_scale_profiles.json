@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "units": "Godot units treated as meters for gameplay calibration",
-  "source": "Bounds medidos no Godot 4.4.1 com AnimationPlayers parados na pose inicial; caixas transformadas ao espaco global com Transform3D * AABB. Execucao de calibracao 42913442304.",
+  "source": "Bounds medidos no Godot 4.4.1 com AnimationPlayers parados na pose inicial; caixas transformadas ao espaco global com Transform3D * AABB. Execucao de calibracao 42913442304. Perfil de Sudowoodo calibrado a partir dos limites globais medidos no Godot 4.4.1 na execucao 42935138011.",
   "formula": "uniform_scale = pokedex_height_m / imported_aabb_size_y; visual_offset = [-center_x, -min_y, -center_z] * uniform_scale. AABB global calculada com Transform3D * AABB (transformação direta).",
   "application": "Apply to a wrapper Node3D around the imported GLB instance. Do not edit or rescale the original GLB files. Keep original_pokemon_village.glb unchanged.",
   "warning": "Perfis geometricamente validados no Godot. Modelos com animações devem passar por inspeção visual das poses antes de aprovação final de gameplay.",
@@ -262,6 +262,28 @@
         0.07516358702866206
       ],
       "rig_status": "has_skeleton_and_2_idle_clips"
+    },
+    "pokemon_sudowoodo_-_tree.glb": {
+      "name": "Sudowoodo",
+      "pokedex_height_m": 1.2,
+      "imported_aabb_min": [
+        -0.671804487705231,
+        0.000903701642528176,
+        -0.163430452346802
+      ],
+      "imported_aabb_max": [
+        0.596584856510162,
+        1.52402424812317,
+        0.314331620931625
+      ],
+      "imported_height": 1.5231205464806419,
+      "uniform_scale": 0.7878562223933937,
+      "visual_offset": [
+        0.02963112724158568,
+        -0.0007119869622529538,
+        -0.05944421231799364
+      ],
+      "rig_status": "no_skeleton_static_tree_model"
     }
   }
 }
