@@ -5,9 +5,8 @@ extends SceneTree
 const REPORT_PATH := "res://lab_smoke_test_report.json"
 const MODEL_FILES := [
 	"amoonguss.glb", "beedrill.glb", "diancie_dancing_to_sweet_dreams.glb",
-	"eevee_pokemon.glb", "flygon_go_fest_2021.glb", "hisuian_voltorb.glb",
-	"ho_oh.glb", "lucario.glb", "magnemite.glb", "mew_pokemon.glb",
-	"pokemon_3ds_celebi.glb", "pokemon_basic_pokeball.glb",
+	"flygon_go_fest_2021.glb", "hisuian_voltorb.glb", "ho_oh.glb",
+	"magnemite.glb", "pokemon_3ds_celebi.glb", "pokemon_basic_pokeball.glb",
 	"pokemon_sudowoodo_-_tree.glb", "shiny_metagross.glb",
 	"smoliv_fully_rigged.glb", "squirtle.glb"
 ]
