@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1] / "godot_validation"
+ROOT = Path(__file__).resolve().parents[1] / "godot_validation" / "godot_validation"
 FLYGON = ROOT / "flygon_clip_audit.json"
 DETAIL = ROOT / "animation_detail_report.json"
 
