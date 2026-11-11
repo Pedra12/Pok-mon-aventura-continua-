@@ -50,6 +50,7 @@ jobs:
           mkdir -p "$HOME/.local/share/godot/export_templates/4.4.1.stable"
           unzip -q /tmp/templates.tpz -d /tmp/godot-templates
           cp -a /tmp/godot-templates/templates/. "$HOME/.local/share/godot/export_templates/4.4.1.stable/"
+          test -s "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_source.zip"
           godot --version
 
       - name: Preparar assets e configuracao
@@ -69,6 +70,8 @@ jobs:
           godot --headless --editor --path game --import
           godot --headless --editor --path game --quit
           godot --headless --path game --quit-after 5
+          godot --headless --path game --install-android-build-template
+          test -s game/android/build/AndroidManifest.xml
 
       - name: Configurar caminhos do SDK no Godot
         run: |
