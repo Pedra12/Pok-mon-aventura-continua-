@@ -53,7 +53,7 @@ func _run() -> void:
 		var profile: Dictionary = lab._get_profile(file_name)
 		var expected_scale := float(profile.get("uniform_scale", 1.0))
 		var expected_offset: Array = profile.get("visual_offset", [0.0, 0.0, 0.0])
-		var actual_scale := lab.current_wrapper.scale.x
+		var actual_scale: float = lab.current_wrapper.scale.x
 		model_result.scale = actual_scale
 		model_result.position = [
 			lab.current_wrapper.position.x,
@@ -70,7 +70,7 @@ func _run() -> void:
 
 		if lab.current_player != null:
 			for clip_index in range(lab.clip_picker.item_count):
-				var clip_name := lab.clip_picker.get_item_text(clip_index)
+				var clip_name: String = lab.clip_picker.get_item_text(clip_index)
 				lab.clip_picker.select(clip_index)
 				lab._play_selected_clip(true)
 				await process_frame
