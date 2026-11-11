@@ -38,10 +38,19 @@ jobs:
       - name: Instalar Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'platform-tools'
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
 
-      - name: Instalar plataformas e ferramentas Android
-        run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+      - name: Instalar e conferir plataformas Android
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          test -d "$ANDROID_SDK_ROOT/platforms/android-34"
+          test -x "$ANDROID_SDK_ROOT/build-tools/34.0.0/aapt"
+          test -x "$ANDROID_SDK_ROOT/platform-tools/adb"
+          echo "ANDROID SDK OK: $ANDROID_SDK_ROOT"
 
       - name: Instalar Godot 4.4.1 e templates Android
         shell: bash
@@ -104,30 +113,78 @@ jobs:
           unzip -t "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_source.zip"
           echo "ANDROID TEMPLATE: pacote oficial íntegro; Godot fará a preparação no export"
           
-      - name: Configurar caminhos do SDK e instalar template Android no projeto
+      - name: Configurar SDK, keystore e template Android do Godot
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$HOME/.config/godot"
+          test -n "$JAVA_HOME"
+          test -d "$ANDROID_SDK_ROOT/platforms/android-34"
+          test -x "$ANDROID_SDK_ROOT/build-tools/34.0.0/aapt"
+          test -x "$ANDROID_SDK_ROOT/platform-tools/adb"
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          mkdir -p "$HOME/.config/godot" "$HOME/.android" game/android/build
           cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
           [gd_resource type="EditorSettings" format=3]
           [resource]
           export/android/android_sdk_path = "$ANDROID_SDK_ROOT"
           export/android/java_sdk_path = "$JAVA_HOME"
           EOF
-          mkdir -p game/android/build
+          cp "$HOME/.config/godot/editor_settings-4.tres" "$HOME/.config/godot/editor_settings-4.4.tres"
+          echo "GODOT EDITOR SETTINGS:"
+          cat "$HOME/.config/godot/editor_settings-4.4.tres"
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PATH="$HOME/.android/debug.keystore"
+          export GODOT_ANDROID_KEYSTORE_DEBUG_USER="androiddebugkey"
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD="android"
+          if [ ! -s "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH" ]; then
+            keytool -genkeypair -v -keystore "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH" -storepass "$GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD" -alias "$GODOT_ANDROID_KEYSTORE_DEBUG_USER" -keypass "$GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD" -dname "CN=Android Debug,O=Android,C=US" -validity 10000 -keyalg RSA -keysize 2048
+          fi
+          {
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$GODOT_ANDROID_KEYSTORE_DEBUG_PATH"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=$GODOT_ANDROID_KEYSTORE_DEBUG_USER"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=$GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD"
+          } >> "$GITHUB_ENV"
+          keytool -list -keystore "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH" -storepass "$GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD" -alias "$GODOT_ANDROID_KEYSTORE_DEBUG_USER"
           unzip -q "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_source.zip" -d game/android/build
           test -s game/android/build/build.gradle
           echo "ANDROID BUILD TEMPLATE: instalado em game/android/build"
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("game/export_presets.cfg")
+          s = p.read_text()
+          replacements = {
+              'keystore/debug=""': 'keystore/debug="' + str(Path.home() / ".android/debug.keystore") + '"',
+              'keystore/debug_user=""': 'keystore/debug_user="androiddebugkey"',
+              'keystore/debug_password=""': 'keystore/debug_password="android"',
+          }
+          for old, new in replacements.items():
+              if old in s:
+                  s = s.replace(old, new)
+              elif new.split("=")[0] not in s:
+                  s += "\\n" + new + "\\n"
+          p.write_text(s)
+          PY
+          grep -E '^keystore/debug' game/export_presets.cfg
 
-      - name: Exportar APK Android
+      - name: Exportar APK Android com log completo
+        shell: bash
         run: |
-          set -euo pipefail
-          godot --headless --path game --export-debug "Android" "$GITHUB_WORKSPACE/build/PokemonAventura.apk"
+          set -uo pipefail
+          mkdir -p build
+          echo "===== INICIO EXPORT GODOT 4.4.1 VERBOSE ====="
+          set +e
+          godot --headless --verbose --path game --export-debug "Android" "$GITHUB_WORKSPACE/build/PokemonAventura.apk" 2>&1
+          export_status=$?
+          set -e
+          echo "===== FIM EXPORT GODOT; exit_code=$export_status ====="
+          if [ "$export_status" -ne 0 ]; then
+            echo "EXPORT FAILED: log acima reproduzido integralmente, sem grep, tail ou filtro."
+            exit "$export_status"
+          fi
           test -s build/PokemonAventura.apk
           file build/PokemonAventura.apk
           unzip -t build/PokemonAventura.apk
-          "$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt" dump badging build/PokemonAventura.apk | head -20
+          "$ANDROID_SDK_ROOT/build-tools/34.0.0/aapt" dump badging build/PokemonAventura.apk
 
       - name: Publicar APK validado
         uses: actions/upload-artifact@v4
