@@ -76,11 +76,17 @@ func _inspect_recursive(node: Node, root_node: Node, report: Dictionary) -> void
 				var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 				var bones: Variant = arrays[Mesh.ARRAY_BONES]
 				var weights: Variant = arrays[Mesh.ARRAY_WEIGHTS]
+				var primitive_type := mesh.surface_get_primitive_type(surface_index)
+				var topology_components: Array = []
+				if primitive_type == Mesh.PRIMITIVE_TRIANGLES:
+					topology_components = _analyze_components(vertices, arrays[Mesh.ARRAY_INDEX])
 				var surface_data: Dictionary = {
 					"surface": surface_index,
+					"primitive_type": primitive_type,
+					"primitive_is_triangles": primitive_type == Mesh.PRIMITIVE_TRIANGLES,
 					"vertex_count": vertices.size(),
 					"has_skin_arrays": bones is PackedInt32Array and bones.size() > 0 and weights is PackedFloat32Array and weights.size() > 0,
-					"topology_components": _analyze_components(vertices, arrays[Mesh.ARRAY_INDEX])
+					"topology_components": topology_components
 				}
 				if not vertices.is_empty():
 					var minimum := vertices[0]
@@ -123,7 +129,6 @@ func _analyze_components(vertices: PackedVector3Array, index_data: Variant) -> A
 	var parent: Array[int] = []
 	for index in range(vertices.size()):
 		parent.append(index)
-	var valid_triangle_count := 0
 	for start in range(0, triangle_indices.size() - 2, 3):
 		var a := int(triangle_indices[start])
 		var b := int(triangle_indices[start + 1])
@@ -132,7 +137,6 @@ func _analyze_components(vertices: PackedVector3Array, index_data: Variant) -> A
 			continue
 		_union(parent, a, b)
 		_union(parent, b, c)
-		valid_triangle_count += 1
 	var groups: Dictionary = {}
 	for vertex_index in range(vertices.size()):
 		var root_index := _find_root(parent, vertex_index)
