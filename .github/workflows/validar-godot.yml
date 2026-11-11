@@ -7,6 +7,7 @@ on:
       - 'godot_validation/**'
       - 'config/**'
       - 'tools/validate_scale_profiles.py'
+      - 'tools/validate_animation_reports.py'
       - '.github/workflows/validar-godot.yml'
       - '**.glb'
 
