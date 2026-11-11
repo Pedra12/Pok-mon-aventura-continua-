@@ -62,6 +62,9 @@ jobs:
       - name: Auditar geometria dos modelos sem rig
         run: godot --headless --path godot_validation --script res://audit_unrigged_geometry.gd
 
+      - name: Gerar diagnostico visual colorido dos componentes Eevee Lucario e Mew
+        run: godot --headless --path godot_validation --script res://visualize_unrigged_components.gd
+
       - name: Testar reproducao de todos os clipes importados
         run: godot --headless --path godot_validation --script res://test_animation_playback.gd
 
@@ -89,5 +92,6 @@ jobs:
             godot_validation/scale_profile_validation.json
             godot_validation/scaled_instance_validation.json
             godot_validation/map_surface_analysis.json
+            godot_validation/component_diagnostics/**
           if-no-files-found: warn
           retention-days: 30
