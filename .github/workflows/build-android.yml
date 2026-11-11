@@ -80,6 +80,12 @@ jobs:
           echo "SMOKE: iniciando jogo por 5 frames"
           timeout 3m xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path game --quit-after 5 --verbose 2>&1 | tee /tmp/godot_smoke.log
           if grep -E "SCRIPT ERROR:|Failed to load script|Parse Error:" /tmp/godot_smoke.log; then echo "ERRO: script falhou no smoke test"; exit 1; fi
+          echo "SCENE SMOKE: testando cena principal, mapa e Squirtle"
+          timeout 3m godot --headless --path game --script res://tests/smoke_test.gd --verbose 2>&1 | tee /tmp/godot_scene_smoke.log
+          if grep -E "SCRIPT ERROR:|Failed to load script|Parse Error:|SMOKE_FAIL:" /tmp/godot_scene_smoke.log; then echo "ERRO: teste da cena principal falhou"; exit 1; fi
+          if ! grep -q "SMOKE_OK main_scene=loaded map=loaded" /tmp/godot_scene_smoke.log; then echo "ERRO: teste nao confirmou mapa e Squirtle"; cat /tmp/godot_scene_smoke.log; exit 1; fi
+          echo "SCENE SMOKE: cena, mapa, Squirtle e jogador confirmados"
+
           echo "ANDROID TEMPLATE: verificando pacote oficial"
           test -s "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_source.zip"
           unzip -t "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_source.zip"
