@@ -142,7 +142,9 @@ func _count_root_motion(clips: Array) -> int:
 func _finish(report: Dictionary) -> void:
     var file := FileAccess.open(REPORT_PATH, FileAccess.WRITE)
     if file:
-        file.store_string(JSON.stringify(report, "\\t"))
+        file.store_string(JSON.stringify(report, "\t"))
         file.close()
+    else:
+        report.errors.append("Nao foi possivel gravar o relatorio JSON")
     print("FLYGON_CLIP_AUDIT=" + JSON.stringify(report.get("summary", {})))
     quit(0 if report.get("errors", []).is_empty() else 1)
