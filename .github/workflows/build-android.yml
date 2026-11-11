@@ -166,6 +166,115 @@ jobs:
           PY
           grep -E '^keystore/debug' game/export_presets.cfg
 
+      - name: Diagnostico completo antes do export Android
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "========== DIAGNOSTICO ANDROID GODOT 4.4.1: INICIO =========="
+          echo "PWD=$(pwd)"
+          echo "CAMINHO PROJECT.GODOT:"
+          realpath game/project.godot
+          echo "========== LS -LA GAME =========="
+          ls -la game
+          echo "========== LS -LA GAME/ANDROID/BUILD =========="
+          if [ -d game/android/build ]; then
+            ls -la game/android/build
+          else
+            echo "AUSENTE: game/android/build"
+          fi
+          echo "========== VERSAO DO TEMPLATE GRADLE =========="
+          if [ -f game/android/build/.build_version ]; then
+            echo "EXISTE: game/android/build/.build_version"
+            cat game/android/build/.build_version
+            template_version="$(tr -d '\r\n' < game/android/build/.build_version)"
+            echo "VERSAO_LIDA=$template_version"
+            if [ "$template_version" = "4.4.1.stable" ]; then
+              echo "TEMPLATE_VERSION_MATCH=SIM"
+            else
+              echo "TEMPLATE_VERSION_MATCH=NAO (esperado 4.4.1.stable)"
+            fi
+          else
+            echo "AUSENTE: game/android/build/.build_version"
+          fi
+
+          echo "========== PRESET ANDROID COMPLETO (SENHAS REDIGIDAS) =========="
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path("game/export_presets.cfg")
+          lines = p.read_text().splitlines()
+          sections = []
+          current = None
+          for line in lines:
+              if line.startswith("[") and line.endswith("]"):
+                  current = line
+              if current and (current == "[preset.0]" or current == "[preset.0.options]"):
+                  safe = re.sub(r'(?i)(keystore/[^=]*password\s*=\s*).*', r'\1"<REDACTED>"', line)
+                  sections.append(safe)
+          print("\\n".join(sections))
+          PY
+
+          echo "========== EDITOR SETTINGS 4.4 =========="
+          if [ -f "$HOME/.config/godot/editor_settings-4.4.tres" ]; then
+            cat "$HOME/.config/godot/editor_settings-4.4.tres"
+          else
+            echo "AUSENTE: $HOME/.config/godot/editor_settings-4.4.tres"
+          fi
+
+          echo "========== VARIAVEIS DE AMBIENTE =========="
+          echo "ANDROID_HOME=${ANDROID_HOME:-<UNSET>}"
+          echo "JAVA_HOME=${JAVA_HOME:-<UNSET>}"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=${GODOT_ANDROID_KEYSTORE_DEBUG_PATH:-<UNSET>}"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=${GODOT_ANDROID_KEYSTORE_DEBUG_USER:-<UNSET>}"
+          if [ -n "${GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD:-}" ]; then
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=<SET; REDACTED>"
+          else
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=<UNSET>"
+          fi
+
+          echo "========== ARQUIVOS DO KEYSTORE =========="
+          if [ -n "${GODOT_ANDROID_KEYSTORE_DEBUG_PATH:-}" ]; then
+            ls -la "$(dirname "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH")"
+            if [ -e "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH" ]; then
+              ls -l "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH"
+              file "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH"
+            else
+              echo "KEYSTORE AUSENTE: $GODOT_ANDROID_KEYSTORE_DEBUG_PATH"
+            fi
+          else
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH nao definido"
+          fi
+
+          echo "========== ANDROID SDK: PLATFORMS =========="
+          if [ -n "${ANDROID_HOME:-}" ] && [ -d "$ANDROID_HOME/platforms" ]; then
+            ls -la "$ANDROID_HOME/platforms"
+          else
+            echo "PASTA platforms ausente ou ANDROID_HOME nao definido"
+          fi
+          echo "========== ANDROID SDK: BUILD-TOOLS =========="
+          if [ -n "${ANDROID_HOME:-}" ] && [ -d "$ANDROID_HOME/build-tools" ]; then
+            ls -la "$ANDROID_HOME/build-tools"
+          else
+            echo "PASTA build-tools ausente ou ANDROID_HOME nao definido"
+          fi
+
+          echo "========== JAVA VERSION =========="
+          java -version 2>&1
+
+          echo "========== GODOT EXPORT TEMPLATES =========="
+          if [ -d "$HOME/.local/share/godot/export_templates" ]; then
+            ls -la "$HOME/.local/share/godot/export_templates/"
+          else
+            echo "PASTA export_templates ausente"
+          fi
+          echo "========== CONTEUDO 4.4.1.STABLE =========="
+          if [ -d "$HOME/.local/share/godot/export_templates/4.4.1.stable" ]; then
+            ls -la "$HOME/.local/share/godot/export_templates/4.4.1.stable/"
+          else
+            echo "AUSENTE: export_templates/4.4.1.stable"
+          fi
+          echo "========== DIAGNOSTICO ANDROID GODOT 4.4.1: FIM =========="
+
       - name: Exportar APK Android com log completo
         shell: bash
         run: |
