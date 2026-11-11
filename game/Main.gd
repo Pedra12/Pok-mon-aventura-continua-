@@ -321,9 +321,9 @@ func _input(event: InputEvent) -> void:
         elif not event.pressed:
             touch_look_pointer = -1
     elif event is InputEventMouseMotion and touch_look_pointer == 999:
-        var delta := event.position - last_look
+        var mouse_delta: Vector2 = event.position - last_look
         last_look = event.position
-        _rotate_camera(delta)
+        _rotate_camera(mouse_delta)
 
 func _update_joystick() -> void:
     var joy_delta: Vector2 = joystick_current - joystick_origin
