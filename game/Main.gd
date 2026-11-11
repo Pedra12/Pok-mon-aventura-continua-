@@ -311,9 +311,9 @@ func _input(event: InputEvent) -> void:
             joystick_current = event.position
             _update_joystick()
         elif event.index == touch_look_pointer:
-            var delta := event.position - last_look
+            var look_delta: Vector2 = event.position - last_look
             last_look = event.position
-            _rotate_camera(delta)
+            _rotate_camera(look_delta)
     elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
         if event.pressed and event.position.x > get_viewport().get_visible_rect().size.x * 0.48:
             touch_look_pointer = 999
@@ -326,12 +326,12 @@ func _input(event: InputEvent) -> void:
         _rotate_camera(delta)
 
 func _update_joystick() -> void:
-    var delta := joystick_current - joystick_origin
-    if delta.length() > joystick_radius:
-        delta = delta.normalized() * joystick_radius
-    move_vector = Vector2(delta.x, delta.y) / joystick_radius
-    var local := joystick_base.to_local(joystick_origin)
-    joystick_knob.position = local + delta - joystick_knob.size * 0.5
+    var joy_delta: Vector2 = joystick_current - joystick_origin
+    if joy_delta.length() > joystick_radius:
+        joy_delta = joy_delta.normalized() * joystick_radius
+    move_vector = Vector2(joy_delta.x, joy_delta.y) / joystick_radius
+    var local: Vector2 = joystick_base.to_local(joystick_origin)
+    joystick_knob.position = local + joy_delta - joystick_knob.size * 0.5
 
 func _reset_joystick() -> void:
     joystick_knob.position = Vector2(50, 50)
