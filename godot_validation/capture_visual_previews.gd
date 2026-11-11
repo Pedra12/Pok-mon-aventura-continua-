@@ -124,6 +124,8 @@ func _capture_model(file_name: String) -> void:
     # Captura neutra antes de tocar qualquer clipe: separa falha do modelo/material
     # de uma animacao que possa ocultar ou deslocar a malha.
     await _save_capture(file_name, "static_bind_pose", wrapper)
+    if file_name == "diancie_dancing_to_sweet_dreams.glb" or file_name == "shiny_metagross.glb":
+        await _capture_isolated_meshes(file_name, instance, wrapper)
     if player != null and not player.get_animation_list().is_empty():
         var clips := player.get_animation_list()
         for clip_index in clips.size():
@@ -189,6 +191,37 @@ func _save_capture(file_name: String, suffix: String, wrapper: Node3D) -> void:
         "render_diagnostics": _measure_foreground(image)
     })
     print("VISUAL_CAPTURE_OK ", output_path)
+
+
+func _capture_isolated_meshes(file_name: String, instance: Node3D, wrapper: Node3D) -> void:
+    var meshes: Array[MeshInstance3D] = []
+    var pending: Array[Node] = [instance]
+    while not pending.is_empty():
+        var current: Node = pending.pop_back()
+        if current is MeshInstance3D and current.mesh:
+            meshes.append(current)
+        for child in current.get_children():
+            pending.append(child)
+    var original_visibility: Array[bool] = []
+    for mesh in meshes:
+        original_visibility.append(mesh.visible)
+    for target_index in meshes.size():
+        for mesh_index in meshes.size():
+            meshes[mesh_index].visible = mesh_index == target_index
+        var target := meshes[target_index]
+        var box: AABB = target.mesh.get_aabb() * target.global_transform
+        var radius := maxf(box.size.length() * 0.5, 0.025)
+        var center := box.get_center()
+        var distance := maxf(radius / tan(deg_to_rad(camera.fov * 0.5)) * 1.8, 0.15)
+        camera.position = center + Vector3(radius * 0.18, radius * 0.12, distance)
+        camera.look_at(center, Vector3.UP)
+        camera.near = maxf(0.001, distance * 0.001)
+        camera.far = maxf(100.0, distance + radius * 8.0)
+        await process_frame
+        await process_frame
+        await _save_capture(file_name, "isolated_mesh_%02d" % (target_index + 1), wrapper)
+    for mesh_index in meshes.size():
+        meshes[mesh_index].visible = original_visibility[mesh_index]
 
 func _safe_name(value: String) -> String:
     var result := value.to_lower()
