@@ -143,8 +143,8 @@ func _build_player() -> void:
 
 func _build_camera() -> void:
     camera_pivot = Node3D.new()
-    camera_pivot.position = Vector3(0, 1.45, 0)
-    player.add_child(camera_pivot)
+    camera_pivot.position = player.global_position + Vector3(0, 1.45, 0)
+    add_child(camera_pivot)
     camera = Camera3D.new()
     camera.position = Vector3(0, 2.0, 5.5)
     camera.current = true
@@ -270,6 +270,8 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 
 func _physics_process(delta: float) -> void:
     encounter_cooldown = maxf(0.0, encounter_cooldown - delta)
+    if camera_pivot and player:
+        camera_pivot.global_position = player.global_position + Vector3(0, 1.45, 0)
     var direction := Vector3(move_vector.x, 0, move_vector.y)
     direction = camera_pivot.global_transform.basis * direction
     direction.y = 0
