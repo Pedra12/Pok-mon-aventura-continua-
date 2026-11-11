@@ -174,20 +174,23 @@ func _inspect_skin_meshes(node: Node, entry: Dictionary) -> void:
                 var weights := arrays[Mesh.ARRAY_WEIGHTS] as PackedFloat32Array
                 var vertices := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
                 var vertex_count := vertices.size()
+                var has_skin_data: bool = bones is PackedInt32Array and weights is PackedFloat32Array
+                var bone_array_size: int = bones.size() if bones is PackedInt32Array else 0
+                var weight_array_size: int = weights.size() if weights is PackedFloat32Array else 0
                 var weighted_vertices := 0
                 var max_influences := 0
                 var used_bones: Dictionary = {}
                 var weight_sum_min := 999999.0
                 var weight_sum_max := 0.0
                 var influences_per_vertex := 0
-                if vertex_count > 0 and not bones.is_empty() and not weights.is_empty():
-                    influences_per_vertex = int(bones.size() / vertex_count)
+                if vertex_count > 0 and has_skin_data and bone_array_size > 0 and weight_array_size > 0:
+                    influences_per_vertex = int(bone_array_size / vertex_count)
                     for vertex_index in range(vertex_count):
                         var sum_weights := 0.0
                         var active_influences := 0
                         for influence in range(influences_per_vertex):
                             var offset := vertex_index * influences_per_vertex + influence
-                            if offset >= bones.size() or offset >= weights.size():
+                            if offset >= bone_array_size or offset >= weight_array_size:
                                 continue
                             var weight := float(weights[offset])
                             if weight > EPSILON:
@@ -205,8 +208,8 @@ func _inspect_skin_meshes(node: Node, entry: Dictionary) -> void:
                     "surface": surface_index,
                     "vertex_count": vertex_count,
                     "influences_per_vertex_slot": influences_per_vertex,
-                    "bone_index_array_size": bones.size(),
-                    "weight_array_size": weights.size(),
+                    "bone_index_array_size": bone_array_size,
+                    "weight_array_size": weight_array_size,
                     "weighted_vertices": weighted_vertices,
                     "unweighted_vertices": vertex_count - weighted_vertices,
                     "max_active_influences_per_vertex": max_influences,
