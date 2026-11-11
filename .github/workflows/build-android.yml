@@ -1,0 +1,96 @@
+name: Compilar e validar APK Android
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'game/**'
+      - 'config/pokemon_scale_profiles.json'
+      - '*.glb'
+      - '.github/workflows/build-android.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Instalar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar plataformas e ferramentas Android
+        run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Instalar Godot 4.4.1 e templates Android
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 -o /tmp/godot.zip https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip
+          curl -L --fail --retry 3 -o /tmp/templates.tpz https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_export_templates.tpz
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.4.1-stable_linux.x86_64
+          sudo ln -sf /tmp/godot/Godot_v4.4.1-stable_linux.x86_64 /usr/local/bin/godot
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.4.1.stable"
+          unzip -q /tmp/templates.tpz -d /tmp/godot-templates
+          cp -a /tmp/godot-templates/templates/. "$HOME/.local/share/godot/export_templates/4.4.1.stable/"
+          godot --version
+
+      - name: Preparar assets e configuracao
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p game/assets game/config build
+          find . -maxdepth 1 -type f -iname '*.glb' -print0 | while IFS= read -r -d '' f; do cp "$f" game/assets/; done
+          cp config/pokemon_scale_profiles.json game/config/
+          test -s game/assets/original_pokemon_village.glb
+          test "$(find game/assets -maxdepth 1 -type f -iname '*.glb' | wc -l)" -eq 14
+          ls -lh game/assets
+
+      - name: Importar e validar projeto Godot
+        run: |
+          set -euo pipefail
+          godot --headless --editor --path game --import
+          godot --headless --editor --path game --quit
+          godot --headless --path game --quit-after 5
+
+      - name: Configurar caminhos do SDK no Godot
+        run: |
+          mkdir -p "$HOME/.config/godot"
+          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_SDK_ROOT"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          EOF
+
+      - name: Exportar APK Android
+        run: |
+          set -euo pipefail
+          godot --headless --path game --export-debug "Android" "$GITHUB_WORKSPACE/build/PokemonAventura.apk"
+          test -s build/PokemonAventura.apk
+          file build/PokemonAventura.apk
+          unzip -t build/PokemonAventura.apk
+          aapt dump badging build/PokemonAventura.apk | head -20
+
+      - name: Publicar APK validado
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pokemon-Aventura-Android
+          path: build/PokemonAventura.apk
+          if-no-files-found: error
+          retention-days: 30
