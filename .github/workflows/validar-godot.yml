@@ -58,6 +58,15 @@ jobs:
       - name: Validar script e cena do laboratorio 3D
         run: godot --headless --path godot_validation --editor --quit
 
+      - name: Instalar servidor grafico virtual para capturas
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri
+
+      - name: Renderizar previews de todos os modelos e clipes
+        run: xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path godot_validation --rendering-driver opengl3 --script res://capture_visual_previews.gd
+
+
       - name: Testar laboratorio em runtime com todos os modelos e clipes
         run: godot --headless --path godot_validation --script res://lab_smoke_test.gd
 
@@ -101,5 +110,7 @@ jobs:
             godot_validation/scaled_instance_validation.json
             godot_validation/map_surface_analysis.json
             godot_validation/flygon_clip_audit.json
+            godot_validation/visual_previews/*.png
+            godot_validation/visual_previews/visual_capture_report.json
           if-no-files-found: warn
           retention-days: 30
