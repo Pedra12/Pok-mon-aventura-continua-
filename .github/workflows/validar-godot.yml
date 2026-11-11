@@ -40,9 +40,9 @@ jobs:
         run: |
           mkdir -p godot_validation/assets godot_validation/config
           cp config/pokemon_scale_profiles.json godot_validation/config/
-          find . -maxdepth 1 -type f -iname '*.glb' -exec cp {} godot_validation/assets/ \;
+          find . -maxdepth 1 -type f -iname '*.glb' -exec cp {} godot_validation/assets/ \\;
           echo "Arquivos GLB copiados:"
-          find godot_validation/assets -maxdepth 1 -type f -printf '%f\n'
+          find godot_validation/assets -maxdepth 1 -type f -printf '%f\\n'
 
       - name: Importar assets no Godot
         run: godot --headless --editor --path godot_validation --import
@@ -52,6 +52,9 @@ jobs:
 
       - name: Testar laboratorio em runtime com todos os modelos e clipes
         run: godot --headless --path godot_validation --script res://lab_smoke_test.gd
+
+      - name: Auditar estrutura dos 16 clipes do Flygon
+        run: godot --headless --path godot_validation --script res://audit_flygon_clips.gd
 
       - name: Verificar cenas, malhas, esqueletos e animacoes
         run: godot --headless --path godot_validation --script res://validate_assets.gd
@@ -86,5 +89,6 @@ jobs:
             godot_validation/scale_profile_validation.json
             godot_validation/scaled_instance_validation.json
             godot_validation/map_surface_analysis.json
+            godot_validation/flygon_clip_audit.json
           if-no-files-found: warn
           retention-days: 30
