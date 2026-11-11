@@ -21,13 +21,13 @@ func _run() -> void:
 			report["errors"].append("Falha ao instanciar " + file_name)
 			continue
 		var model_report: Dictionary = {"meshes": [], "views": []}
-		_colorize_recursive(instance, instance, model_report)
 		var viewport := SubViewport.new()
 		viewport.size = VIEW_SIZE
 		viewport.own_world_3d = true
 		viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 		root.add_child(viewport)
 		viewport.add_child(instance)
+		_colorize_recursive(instance, instance, model_report)
 		var camera := Camera3D.new()
 		camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 		camera.current = true
