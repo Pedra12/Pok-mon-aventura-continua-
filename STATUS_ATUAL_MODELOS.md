@@ -24,13 +24,13 @@ Todas as etapas do workflow passaram no Godot 4.4.1:
 - 29 clipes reproduzidos sem erros.
 - 26 clipes apresentaram mudanças de pose esquelética.
 - 22 clipes apresentaram mudanças de transformação de nós.
-- 11/11 perfis de escala passaram, sem falhas.
+- 12/12 perfis de escala passaram na última validação concluída; o perfil de Sudowoodo foi acrescentado depois e está aguardando a nova execução automática do workflow.
 - O mapa foi preservado e carregado.
 - A análise do mapa encontrou 58 superfícies de malha e 55 candidatas geometricamente horizontais.
 
 **Interpretação importante:** esses resultados confirmam importação, estrutura, reprodução técnica e consistência numérica de escala. Não comprovam que as animações estejam visualmente corretas, que os movimentos correspondam ao nome dos clipes, nem que o mapa já tenha colisores de gameplay ou pontos de spawn seguros.
 
-## Próxima prioridade: Flygon
+O Sudowoodo agora tem perfil individual calculado para 1,2 m, usando os limites medidos no Godot. O novo perfil ainda precisa passar pela execução automática antes de ser considerado validado.\n\n## Próxima prioridade: Flygon
 
 O Flygon tem 16 clipes e é o melhor candidato para iniciar a classificação visual. O relatório detectou movimento em dezenas de ossos em cada clipe. Durações e nomes importados:
 
