@@ -76,7 +76,7 @@ func _inspect_recursive(node: Node, root_node: Node, report: Dictionary) -> void
 				var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 				var bones: Variant = arrays[Mesh.ARRAY_BONES]
 				var weights: Variant = arrays[Mesh.ARRAY_WEIGHTS]
-				var primitive_type := mesh.surface_get_primitive_type(surface_index)
+				var primitive_type: int = mesh.surface_get_primitive_type(surface_index)
 				var topology_components: Array = []
 				if primitive_type == Mesh.PRIMITIVE_TRIANGLES:
 					topology_components = _analyze_components(vertices, arrays[Mesh.ARRAY_INDEX])
