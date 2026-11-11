@@ -59,6 +59,9 @@ jobs:
       - name: Auditar cada clipe em cinco pontos e mapear ossos e nos movimentados
         run: godot --headless --path godot_validation --script res://audit_animation_detail.gd
 
+      - name: Auditar geometria dos modelos sem rig
+        run: godot --headless --path godot_validation --script res://audit_unrigged_geometry.gd
+
       - name: Testar reproducao de todos os clipes importados
         run: godot --headless --path godot_validation --script res://test_animation_playback.gd
 
@@ -80,6 +83,7 @@ jobs:
           path: |
             godot_validation/godot_validation_report.json
             godot_validation/animation_detail_report.json
+            godot_validation/unrigged_geometry_report.json
             godot_validation/animation_playback_smoke_report.json
             godot_validation/lab_smoke_test_report.json
             godot_validation/scale_profile_validation.json
