@@ -232,7 +232,7 @@ func _measure_foreground(image: Image) -> Dictionary:
     for y in image.get_height():
         for x in image.get_width():
             var color := image.get_pixel(x, y)
-            if color.distance_to(background) > 0.055:
+            if Vector3(color.r, color.g, color.b).distance_to(Vector3(background.r, background.g, background.b)) > 0.055:
                 foreground += 1
                 min_x = mini(min_x, x)
                 min_y = mini(min_y, y)
