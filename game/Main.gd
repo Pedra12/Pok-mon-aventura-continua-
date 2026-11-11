@@ -90,17 +90,22 @@ func _create_map_collisions(root_node: Node) -> void:
             meshes.append(current)
         for child in current.get_children():
             pending.append(child)
+    var collision_count := 0
     for mesh_instance in meshes:
         if mesh_instance.mesh == null:
             continue
+        var trimesh_shape := mesh_instance.mesh.create_trimesh_shape()
+        if trimesh_shape == null:
+            continue
         var body := StaticBody3D.new()
-        body.name = "WorldCollision_" + str(mesh_instance.get_instance_id())
+        body.name = "WorldCollision_" + str(collision_count + 1)
         var collision := CollisionShape3D.new()
-        collision.shape = mesh_instance.mesh.create_trimesh_shape()
-        if collision.shape:
-            body.add_child(collision)
-            mesh_instance.add_child(body)
-    print("MAP_COLLISION_MESHES ", meshes.size())
+        collision.shape = trimesh_shape
+        body.add_child(collision)
+        root_node.add_child(body)
+        body.global_transform = mesh_instance.global_transform
+        collision_count += 1
+    print("MAP_COLLISION_MESHES ", collision_count, "/", meshes.size())
 
 func _build_player() -> void:
     player = CharacterBody3D.new()
