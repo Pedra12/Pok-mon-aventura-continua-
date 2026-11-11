@@ -166,11 +166,14 @@ func _analyze_components(vertices: PackedVector3Array, index_data: Variant) -> A
 	for root_index in roots:
 		var group: Dictionary = groups[root_index]
 		var count := int(group["vertex_count"])
+		var sum_value: Vector3 = group["sum"]
+		var min_value: Vector3 = group["min"]
+		var max_value: Vector3 = group["max"]
 		result.append({
 			"vertex_count": count,
 			"triangle_count": int(group["triangle_count"]),
-			"bounds_min": _vec3(group["min"]),
-			"bounds_max": _vec3(group["max"]),
-			"centroid": _vec3((group["sum"] as Vector3) / float(count))
+			"bounds_min": _vec3(min_value),
+			"bounds_max": _vec3(max_value),
+			"centroid": _vec3(sum_value / float(count))
 		})
 	return result
