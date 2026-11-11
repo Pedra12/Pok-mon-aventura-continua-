@@ -121,9 +121,10 @@ func _capture_model(file_name: String) -> void:
     }
 
     var player := _find_animation_player(instance)
-    if player == null or player.get_animation_list().is_empty():
-        await _save_capture(file_name, "static", wrapper)
-    else:
+    # Captura neutra antes de tocar qualquer clipe: separa falha do modelo/material
+    # de uma animacao que possa ocultar ou deslocar a malha.
+    await _save_capture(file_name, "static_bind_pose", wrapper)
+    if player != null and not player.get_animation_list().is_empty():
         var clips := player.get_animation_list()
         for clip_index in clips.size():
             var clip_name: String = clips[clip_index]
