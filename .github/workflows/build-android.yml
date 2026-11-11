@@ -68,18 +68,20 @@ jobs:
         run: |
           set -euo pipefail
           echo "IMPORT: iniciando importacao dos GLB"
-          timeout 12m godot --headless --editor --path game --import --verbose
+          timeout 12m xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --editor --path game --import --verbose
           echo "IMPORT: concluido; validando scripts"
-          timeout 5m godot --headless --editor --path game --quit --verbose 2>&1 | tee /tmp/godot_validate.log
+          timeout 5m xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --editor --path game --quit --verbose 2>&1 | tee /tmp/godot_validate.log
           if grep -E "SCRIPT ERROR:|Failed to load script|Parse Error:" /tmp/godot_validate.log; then echo "ERRO: script Godot invalido"; exit 1; fi
           echo "SMOKE: iniciando jogo por 5 frames"
-          timeout 3m godot --headless --path game --quit-after 5 --verbose 2>&1 | tee /tmp/godot_smoke.log
+          timeout 3m xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path game --quit-after 5 --verbose 2>&1 | tee /tmp/godot_smoke.log
           if grep -E "SCRIPT ERROR:|Failed to load script|Parse Error:" /tmp/godot_smoke.log; then echo "ERRO: script falhou no smoke test"; exit 1; fi
           echo "ANDROID TEMPLATE: instalando"
-          timeout 5m godot --headless --path game --install-android-build-template 2>&1 | tee /tmp/godot_template.log
-          if grep -E "SCRIPT ERROR:|Failed to load script|Parse Error:" /tmp/godot_template.log; then echo "ERRO: script falhou durante template Android"; exit 1; fi
-          test -s game/android/build/AndroidManifest.xml
-
+          mkdir -p game/android/build
+          unzip -q "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_source.zip" -d game/android/build
+          test -s game/android/build/build.gradle
+          test -s game/android/build/src/main/AndroidManifest.xml
+          echo "ANDROID TEMPLATE: instalado e manifesto verificado"
+          
       - name: Configurar caminhos do SDK no Godot
         run: |
           mkdir -p "$HOME/.config/godot"
