@@ -85,7 +85,7 @@ jobs:
           test -s build/PokemonAventura.apk
           file build/PokemonAventura.apk
           unzip -t build/PokemonAventura.apk
-          aapt dump badging build/PokemonAventura.apk | head -20
+          "$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt" dump badging build/PokemonAventura.apk | head -20
 
       - name: Publicar APK validado
         uses: actions/upload-artifact@v4
