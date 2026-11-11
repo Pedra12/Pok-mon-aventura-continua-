@@ -87,28 +87,6 @@
       ],
       "rig_status": "has_skeleton_and_animation"
     },
-    "eevee_pokemon.glb": {
-      "name": "Eevee",
-      "pokedex_height_m": 0.3,
-      "imported_aabb_min": [
-        135.954681396484,
-        37.739673614502,
-        -78.1158218383789
-      ],
-      "imported_aabb_max": [
-        334.362579345703,
-        179.099334716797,
-        78.2748641967773
-      ],
-      "imported_height": 141.35966110229498,
-      "uniform_scale": 0.0021222461744790466,
-      "visual_offset": [
-        -0.49906450370078537,
-        -0.0800928779544647,
-        -0.00016876351834555948
-      ],
-      "rig_status": "no_skeleton_detected_needs_rig"
-    },
     "flygon_go_fest_2021.glb": {
       "name": "Flygon",
       "pokedex_height_m": 2,
@@ -175,28 +153,6 @@
       ],
       "rig_status": "has_skeleton_and_animation"
     },
-    "lucario.glb": {
-      "name": "Lucario",
-      "pokedex_height_m": 1.2,
-      "imported_aabb_min": [
-        -1.48213195800781,
-        -0.0105419997125864,
-        -1.48213195800781
-      ],
-      "imported_aabb_max": [
-        1.48213195800781,
-        1.86596703529358,
-        1.48213195800781
-      ],
-      "imported_height": 1.8765090350061664,
-      "uniform_scale": 0.6394853302670385,
-      "visual_offset": [
-        0,
-        0.006741454167878338,
-        0
-      ],
-      "rig_status": "no_skeleton_detected_needs_rig"
-    },
     "magnemite.glb": {
       "name": "Magnemite",
       "pokedex_height_m": 0.3,
@@ -218,28 +174,6 @@
         -0.022584824287046956
       ],
       "rig_status": "has_skeleton_and_animation"
-    },
-    "mew_pokemon.glb": {
-      "name": "Mew",
-      "pokedex_height_m": 0.4,
-      "imported_aabb_min": [
-        -32.2523994445801,
-        -29.6443996429443,
-        22.336799621582
-      ],
-      "imported_aabb_max": [
-        32.9948997497559,
-        30.3873996734619,
-        63.7458992004395
-      ],
-      "imported_height": 60.0317993164062,
-      "uniform_scale": 0.0066631352808824325,
-      "visual_offset": [
-        -0.0024736899897414314,
-        0.19752464514148074,
-        -0.286790333797294
-      ],
-      "rig_status": "no_skeleton_detected_needs_rig"
     },
     "pokemon_3ds_celebi.glb": {
       "name": "Celebi",

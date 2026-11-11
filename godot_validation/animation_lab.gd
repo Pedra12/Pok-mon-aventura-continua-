@@ -2,15 +2,15 @@ extends Node3D
 
 const MODEL_FILES := [
  "amoonguss.glb","beedrill.glb","diancie_dancing_to_sweet_dreams.glb",
- "eevee_pokemon.glb","flygon_go_fest_2021.glb","hisuian_voltorb.glb",
- "ho_oh.glb","lucario.glb","magnemite.glb","mew_pokemon.glb",
+ "flygon_go_fest_2021.glb","hisuian_voltorb.glb",
+ "ho_oh.glb","magnemite.glb",
  "pokemon_3ds_celebi.glb","pokemon_basic_pokeball.glb",
  "pokemon_sudowoodo_-_tree.glb","shiny_metagross.glb",
  "smoliv_fully_rigged.glb","squirtle.glb"
 ]
 const MODEL_LABELS := [
- "Amoonguss","Beedrill","Diancie","Eevee","Flygon","Voltorb Hisui",
- "Ho-Oh","Lucario","Magnemite","Mew","Celebi","Pokébola",
+ "Amoonguss","Beedrill","Diancie","Flygon","Voltorb Hisui",
+ "Ho-Oh","Magnemite","Celebi","Pokébola",
  "Sudowoodo","Metagross","Smoliv","Squirtle"
 ]
 const PROFILE_PATH := "res://config/pokemon_scale_profiles.json"

@@ -49,21 +49,6 @@
       ],
       "rig_strategy": "usar quadril, coluna, cabeça, braços, mãos, orelhas e feelers"
     },
-    "eevee_pokemon.glb": {
-      "rig": "sem Skeleton3D",
-      "existing_clips": [],
-      "existing_clip_count": 0,
-      "first_use": "não animar até concluir rig",
-      "next": [
-        "rig de quatro patas",
-        "idle",
-        "caminhada/corrida",
-        "salto",
-        "ataque",
-        "dano e desmaio"
-      ],
-      "rig_strategy": "rig quadrúpede com coluna, pescoço, cabeça, quatro pernas, orelhas e cauda; exige pesos de influência"
-    },
     "flygon_go_fest_2021.glb": {
       "rig": "92 ossos no GLB; 94 no Godot",
       "existing_clips": [
@@ -123,22 +108,6 @@
       ],
       "rig_strategy": "usar cadeias das asas/penas, pescoço, cabeça, cauda e pernas; evitar animação de voo baseada em pernas"
     },
-    "lucario.glb": {
-      "rig": "sem Skeleton3D",
-      "existing_clips": [],
-      "existing_clip_count": 0,
-      "first_use": "não animar até concluir rig",
-      "next": [
-        "rig bípede",
-        "idle",
-        "caminhada/corrida",
-        "postura de combate",
-        "aura sphere",
-        "golpe corpo a corpo",
-        "dano e desmaio"
-      ],
-      "rig_strategy": "rig bípede com coluna, cabeça, braços/mãos, pernas/pés e cauda; exige pesos de influência"
-    },
     "magnemite.glb": {
       "rig": "5 ossos",
       "existing_clips": [
@@ -153,20 +122,6 @@
         "dano/desmaio"
       ],
       "rig_strategy": "corpo rígido flutuante; animar root, ímãs e parafusos sem rig de pernas"
-    },
-    "mew_pokemon.glb": {
-      "rig": "sem Skeleton3D",
-      "existing_clips": [],
-      "existing_clip_count": 0,
-      "first_use": "não animar até concluir rig",
-      "next": [
-        "rig leve e flexível",
-        "flutuação/idle",
-        "voo e esquiva",
-        "ataque psíquico",
-        "dano e desmaio"
-      ],
-      "rig_strategy": "rig leve com coluna, cabeça, membros curtos e cauda longa; exige pesos de influência"
     },
     "pokemon_3ds_celebi.glb": {
       "rig": "59 ossos",
@@ -237,7 +192,7 @@
   "cautions": [
     "Os nomes dos clipes não comprovam seu conteúdo visual. Os clipes Take 001, mixamo.com e Animation precisam ser assistidos antes de receber uma função.",
     "A presença de ossos não prova que todos os pesos de influência estejam corretos.",
-    "Eevee, Lucario e Mew precisam de rig e skin weights; dimensões e nomes de malha não geram rig anatômico automaticamente.",
-    "Não sobrescrever os GLBs originais nem remover clipes já existentes."
+    "Não sobrescrever os GLBs originais nem remover clipes já existentes.",
+    "Eevee, Lucario e Mew foram arquivados fora do conjunto ativo; seus arquivos originais foram preservados em archive/deferred_models."
   ]
 }
