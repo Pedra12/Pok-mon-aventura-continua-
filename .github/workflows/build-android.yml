@@ -80,12 +80,10 @@ jobs:
           echo "SMOKE: iniciando jogo por 5 frames"
           timeout 3m xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path game --quit-after 5 --verbose 2>&1 | tee /tmp/godot_smoke.log
           if grep -E "SCRIPT ERROR:|Failed to load script|Parse Error:" /tmp/godot_smoke.log; then echo "ERRO: script falhou no smoke test"; exit 1; fi
-          echo "ANDROID TEMPLATE: instalando"
-          mkdir -p game/android/build
-          unzip -q "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_source.zip" -d game/android/build
-          test -s game/android/build/build.gradle
-          test -s game/android/build/src/main/AndroidManifest.xml
-          echo "ANDROID TEMPLATE: instalado e manifesto verificado"
+          echo "ANDROID TEMPLATE: verificando pacote oficial"
+          test -s "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_source.zip"
+          unzip -t "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_source.zip"
+          echo "ANDROID TEMPLATE: pacote oficial íntegro; Godot fará a preparação no export"
           
       - name: Configurar caminhos do SDK no Godot
         run: |
