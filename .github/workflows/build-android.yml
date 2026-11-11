@@ -69,6 +69,19 @@ jobs:
           test "$(find game/assets -maxdepth 1 -type f -iname '*.glb' | wc -l)" -eq 14
           ls -lh game/assets
 
+      - name: Conferir configuracao da cena e Android
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'run/main_scene="res://main.tscn"' game/project.godot
+          grep -Fq 'window/handheld/orientation=0' game/project.godot
+          grep -Fq 'renderer/rendering_method="gl_compatibility"' game/project.godot
+          grep -Fq 'pointing/emulate_touch_from_mouse=true' game/project.godot
+          grep -Fq 'const MAP_PATH := "res://assets/original_pokemon_village.glb"' game/main.gd
+          grep -Fq 'const POKEMON_PATH := "res://assets/squirtle.glb"' game/main.gd
+          grep -Fq 'screen/orientation=0' game/export_presets.cfg
+          echo "CONFIG_OK cena principal, landscape, GL Compatibility, touch, mapa e Squirtle"
+
       - name: Importar e validar projeto Godot
         run: |
           set -euo pipefail
