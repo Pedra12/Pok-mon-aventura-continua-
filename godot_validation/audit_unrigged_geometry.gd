@@ -79,7 +79,8 @@ func _inspect_recursive(node: Node, root_node: Node, report: Dictionary) -> void
 				var surface_data: Dictionary = {
 					"surface": surface_index,
 					"vertex_count": vertices.size(),
-					"has_skin_arrays": bones is PackedInt32Array and bones.size() > 0 and weights is PackedFloat32Array and weights.size() > 0
+					"has_skin_arrays": bones is PackedInt32Array and bones.size() > 0 and weights is PackedFloat32Array and weights.size() > 0,
+					"topology_components": _analyze_components(vertices, arrays[Mesh.ARRAY_INDEX])
 				}
 				if not vertices.is_empty():
 					var minimum := vertices[0]
@@ -96,3 +97,77 @@ func _inspect_recursive(node: Node, root_node: Node, report: Dictionary) -> void
 			report["meshes"].append(mesh_data)
 	for child in node.get_children():
 		_inspect_recursive(child, root_node, report)
+
+
+func _find_root(parent: Array[int], value: int) -> int:
+	if parent[value] != value:
+		parent[value] = _find_root(parent, parent[value])
+	return parent[value]
+
+func _union(parent: Array[int], a: int, b: int) -> void:
+	var root_a := _find_root(parent, a)
+	var root_b := _find_root(parent, b)
+	if root_a != root_b:
+		parent[root_b] = root_a
+
+func _analyze_components(vertices: PackedVector3Array, index_data: Variant) -> Array:
+	var result: Array = []
+	if vertices.is_empty():
+		return result
+	var triangle_indices := PackedInt32Array()
+	if index_data is PackedInt32Array and not index_data.is_empty():
+		triangle_indices = index_data
+	else:
+		for index in range(vertices.size()):
+			triangle_indices.append(index)
+	var parent: Array[int] = []
+	for index in range(vertices.size()):
+		parent.append(index)
+	var valid_triangle_count := 0
+	for start in range(0, triangle_indices.size() - 2, 3):
+		var a := int(triangle_indices[start])
+		var b := int(triangle_indices[start + 1])
+		var c := int(triangle_indices[start + 2])
+		if a < 0 or b < 0 or c < 0 or a >= vertices.size() or b >= vertices.size() or c >= vertices.size():
+			continue
+		_union(parent, a, b)
+		_union(parent, b, c)
+		valid_triangle_count += 1
+	var groups: Dictionary = {}
+	for vertex_index in range(vertices.size()):
+		var root_index := _find_root(parent, vertex_index)
+		if not groups.has(root_index):
+			groups[root_index] = {
+				"vertex_count": 0,
+				"triangle_count": 0,
+				"min": vertices[vertex_index],
+				"max": vertices[vertex_index],
+				"sum": Vector3.ZERO
+			}
+		var group: Dictionary = groups[root_index]
+		group["vertex_count"] += 1
+		group["min"] = (group["min"] as Vector3).min(vertices[vertex_index])
+		group["max"] = (group["max"] as Vector3).max(vertices[vertex_index])
+		group["sum"] = (group["sum"] as Vector3) + vertices[vertex_index]
+	for start in range(0, triangle_indices.size() - 2, 3):
+		var a := int(triangle_indices[start])
+		var b := int(triangle_indices[start + 1])
+		var c := int(triangle_indices[start + 2])
+		if a < 0 or b < 0 or c < 0 or a >= vertices.size() or b >= vertices.size() or c >= vertices.size():
+			continue
+		var root_index := _find_root(parent, a)
+		if groups.has(root_index):
+			groups[root_index]["triangle_count"] += 1
+	var roots: Array = groups.keys()
+	roots.sort_custom(func(a: Variant, b: Variant) -> bool: return int(groups[a]["vertex_count"]) > int(groups[b]["vertex_count"]))
+	for root_index in roots:
+		var group: Dictionary = groups[root_index]
+		var count := int(group["vertex_count"])
+		result.append({
+			"vertex_count": count,
+			"triangle_count": int(group["triangle_count"]),
+			"bounds_min": _vec3(group["min"]),
+			"bounds_max": _vec3(group["max"]),
+			"centroid": _vec3((group["sum"] as Vector3) / float(count))
+		})
+	return result
