@@ -38,11 +38,18 @@ jobs:
       - name: Preparar projeto temporario com os GLBs originais
         shell: bash
         run: |
+          set -euo pipefail
           mkdir -p godot_validation/assets godot_validation/config
           cp config/pokemon_scale_profiles.json godot_validation/config/
-          find . -maxdepth 1 -type f -iname '*.glb' -exec cp {} godot_validation/assets/ \\;
-          echo "Arquivos GLB copiados:"
-          find godot_validation/assets -maxdepth 1 -type f -printf '%f\\n'
+          copied=0
+          while IFS= read -r -d '' file; do
+            cp "$file" godot_validation/assets/
+            copied=$((copied + 1))
+          done < <(find . -maxdepth 1 -type f -iname '*.glb' -print0)
+          echo "Arquivos GLB copiados: $copied"
+          find godot_validation/assets -maxdepth 1 -type f -iname '*.glb' -printf '%f\n' | sort
+          test "$copied" -gt 0
+          test -f godot_validation/assets/original_pokemon_village.glb
 
       - name: Importar assets no Godot
         run: godot --headless --editor --path godot_validation --import
