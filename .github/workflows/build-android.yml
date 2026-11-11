@@ -136,6 +136,7 @@ jobs:
           export GODOT_ANDROID_KEYSTORE_DEBUG_PATH="$HOME/.android/debug.keystore"
           export GODOT_ANDROID_KEYSTORE_DEBUG_USER="androiddebugkey"
           export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD="android"
+          echo "::add-mask::$GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD"
           if [ ! -s "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH" ]; then
             keytool -genkeypair -v -keystore "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH" -storepass "$GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD" -alias "$GODOT_ANDROID_KEYSTORE_DEBUG_USER" -keypass "$GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD" -dname "CN=Android Debug,O=Android,C=US" -validity 10000 -keyalg RSA -keysize 2048
           fi
@@ -211,7 +212,7 @@ jobs:
               if current and (current == "[preset.0]" or current == "[preset.0.options]"):
                   safe = re.sub(r'(?i)(keystore/[^=]*password\s*=\s*).*', r'\1"<REDACTED>"', line)
                   sections.append(safe)
-          print("\\n".join(sections))
+          print(chr(10).join(sections))
           PY
 
           echo "========== EDITOR SETTINGS 4.4 =========="
