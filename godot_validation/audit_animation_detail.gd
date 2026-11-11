@@ -170,9 +170,9 @@ func _inspect_skin_meshes(node: Node, entry: Dictionary) -> void:
             var surface_reports: Array = []
             for surface_index in range(mesh.get_surface_count()):
                 var arrays := mesh.surface_get_arrays(surface_index)
-                var bones := arrays[Mesh.ARRAY_BONES] as PackedInt32Array
-                var weights := arrays[Mesh.ARRAY_WEIGHTS] as PackedFloat32Array
-                var vertices := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+                var bones: Variant = arrays[Mesh.ARRAY_BONES]
+                var weights: Variant = arrays[Mesh.ARRAY_WEIGHTS]
+                var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
                 var vertex_count := vertices.size()
                 var has_skin_data: bool = bones is PackedInt32Array and weights is PackedFloat32Array
                 var bone_array_size: int = bones.size() if bones is PackedInt32Array else 0
