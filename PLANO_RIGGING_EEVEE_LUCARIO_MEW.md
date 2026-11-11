@@ -26,6 +26,7 @@ A auditoria considera componentes conectados por índices de triângulos em cada
 ### Eevee
 
 - Quatro MeshInstances e 94 componentes de conectividade.
+- Distribuição por MeshInstance: 38, 9, 4 e 43 componentes, respectivamente.
 - As peças estão distribuídas por coordenadas de origem incomuns no arquivo importado.
 - A quantidade de ilhas permite investigar separação de partes rígidas, mas não autoriza associar automaticamente cada ilha a orelha, cauda, cabeça ou pata.
 - Próximo passo: produzir uma visualização de diagnóstico com cores por componente, preservando transformações e materiais, para identificar partes anatômicas antes de criar pivôs.
@@ -33,6 +34,7 @@ A auditoria considera componentes conectados por índices de triângulos em cada
 ### Lucario
 
 - Dez MeshInstances e 185 componentes de conectividade.
+- Distribuição por MeshInstance, na ordem dos nós importados: 18, 21, 4, 2, 1, 18, 14, 96, 9 e 2 componentes.
 - Os nós de malha não possuem pivôs anatômicos úteis; vários vértices usam coordenadas locais absolutas.
 - Há componentes e grupos repetidos, inclusive em superfícies diferentes. Isso pode decorrer de materiais, duplicação ou separação de superfícies.
 - Próximo passo: visualizar cada MeshInstance e seus componentes com cores distintas; então criar pivôs auxiliares nos centros anatômicos identificados, sem alterar a posição final do modelo. A animação rígida só será aceita para peças realmente separadas. Articulações que precisem de deformação contínua exigem rig/weights.
