@@ -24,6 +24,7 @@ var camera: Camera3D
 var capture_count := 0
 var errors: Array[String] = []
 var capture_rows: Array[Dictionary] = []
+var current_model_diagnostics: Dictionary = {}
 
 func _initialize() -> void:
     call_deferred("_run")
@@ -103,12 +104,21 @@ func _capture_model(file_name: String) -> void:
     if bounds.size.length() < 0.0001:
         bounds = AABB(Vector3(-0.5, 0.0, -0.5), Vector3(1.0, 1.0, 1.0))
     var center := bounds.get_center()
-    var max_dimension := maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z))
-    max_dimension = maxf(max_dimension, 0.25)
-    camera.position = center + Vector3(max_dimension * 0.20, max_dimension * 0.12, max_dimension * 2.9)
+    var radius := maxf(bounds.size.length() * 0.5, 0.05)
+    # Enquadramento por esfera envolvente para nao cortar asas e poses largas.
+    var distance := radius / tan(deg_to_rad(camera.fov * 0.5)) * 1.45
+    camera.position = center + Vector3(radius * 0.22, radius * 0.16, distance)
     camera.look_at(center, Vector3.UP)
-    camera.near = maxf(0.01, max_dimension * 0.001)
-    camera.far = maxf(100.0, max_dimension * 12.0)
+    camera.near = maxf(0.005, distance * 0.001)
+    camera.far = maxf(100.0, distance + radius * 8.0)
+    current_model_diagnostics = {
+        "bounds_position": [bounds.position.x, bounds.position.y, bounds.position.z],
+        "bounds_size": [bounds.size.x, bounds.size.y, bounds.size.z],
+        "bounds_center": [center.x, center.y, center.z],
+        "bounds_radius": radius,
+        "camera_distance": distance,
+        "mesh_stats": _collect_mesh_stats(instance)
+    }
 
     var player := _find_animation_player(instance)
     if player == null or player.get_animation_list().is_empty():
@@ -173,7 +183,9 @@ func _save_capture(file_name: String, suffix: String, wrapper: Node3D) -> void:
         "file": file_name,
         "capture": suffix,
         "path": output_path,
-        "image_size": [image.get_width(), image.get_height()]
+        "image_size": [image.get_width(), image.get_height()],
+        "model_diagnostics": current_model_diagnostics,
+        "render_diagnostics": _measure_foreground(image)
     })
     print("VISUAL_CAPTURE_OK ", output_path)
 
@@ -184,3 +196,53 @@ func _safe_name(value: String) -> String:
     while result.contains("__"):
         result = result.replace("__", "_")
     return result.strip_edges()
+
+func _collect_mesh_stats(node: Node) -> Dictionary:
+    var count := 0
+    var visible_count := 0
+    var surfaces := 0
+    var invalid_meshes := 0
+    var pending: Array[Node] = [node]
+    while not pending.is_empty():
+        var current: Node = pending.pop_back()
+        if current is MeshInstance3D:
+            count += 1
+            if current.visible and current.is_visible_in_tree():
+                visible_count += 1
+            if current.mesh:
+                surfaces += current.mesh.get_surface_count()
+            else:
+                invalid_meshes += 1
+        for child in current.get_children():
+            pending.append(child)
+    return {
+        "mesh_instances": count,
+        "visible_mesh_instances": visible_count,
+        "surfaces": surfaces,
+        "mesh_instances_without_mesh": invalid_meshes
+    }
+
+func _measure_foreground(image: Image) -> Dictionary:
+    var background := image.get_pixel(0, 0)
+    var min_x := image.get_width()
+    var min_y := image.get_height()
+    var max_x := -1
+    var max_y := -1
+    var foreground := 0
+    for y in image.get_height():
+        for x in image.get_width():
+            var color := image.get_pixel(x, y)
+            if color.distance_to(background) > 0.055:
+                foreground += 1
+                min_x = mini(min_x, x)
+                min_y = mini(min_y, y)
+                max_x = maxi(max_x, x)
+                max_y = maxi(max_y, y)
+    var bbox: Array[int] = []
+    if max_x >= min_x and max_y >= min_y:
+        bbox = [min_x, min_y, max_x, max_y]
+    return {
+        "foreground_pixels": foreground,
+        "foreground_ratio": float(foreground) / float(image.get_width() * image.get_height()),
+        "foreground_bbox": bbox
+    }
