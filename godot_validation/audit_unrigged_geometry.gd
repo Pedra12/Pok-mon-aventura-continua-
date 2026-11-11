@@ -74,12 +74,12 @@ func _inspect_recursive(node: Node, root_node: Node, report: Dictionary) -> void
 			for surface_index in range(mesh.get_surface_count()):
 				var arrays: Array = mesh.surface_get_arrays(surface_index)
 				var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-				var bones = arrays[Mesh.ARRAY_BONES]
-				var weights = arrays[Mesh.ARRAY_WEIGHTS]
+				var bones: Variant = arrays[Mesh.ARRAY_BONES]
+				var weights: Variant = arrays[Mesh.ARRAY_WEIGHTS]
 				var surface_data: Dictionary = {
 					"surface": surface_index,
 					"vertex_count": vertices.size(),
-					"has_skin_arrays": bones.size() > 0 and weights.size() > 0
+					"has_skin_arrays": bones is PackedInt32Array and bones.size() > 0 and weights is PackedFloat32Array and weights.size() > 0
 				}
 				if not vertices.is_empty():
 					var minimum := vertices[0]
