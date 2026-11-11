@@ -203,6 +203,7 @@ func _collect_mesh_stats(node: Node) -> Dictionary:
     var visible_count := 0
     var surfaces := 0
     var invalid_meshes := 0
+    var mesh_details: Array[Dictionary] = []
     var pending: Array[Node] = [node]
     while not pending.is_empty():
         var current: Node = pending.pop_back()
@@ -210,17 +211,47 @@ func _collect_mesh_stats(node: Node) -> Dictionary:
             count += 1
             if current.visible and current.is_visible_in_tree():
                 visible_count += 1
+            var mesh_info: Dictionary = {
+                "node": str(current.get_path()),
+                "visible": current.visible,
+                "visible_in_tree": current.is_visible_in_tree(),
+                "global_position": [current.global_position.x, current.global_position.y, current.global_position.z],
+                "global_scale": [current.global_basis.get_scale().x, current.global_basis.get_scale().y, current.global_basis.get_scale().z]
+            }
             if current.mesh:
+                var local_box: AABB = current.mesh.get_aabb()
+                var world_box: AABB = local_box * current.global_transform
                 surfaces += current.mesh.get_surface_count()
+                mesh_info["mesh_aabb_position"] = [local_box.position.x, local_box.position.y, local_box.position.z]
+                mesh_info["mesh_aabb_size"] = [local_box.size.x, local_box.size.y, local_box.size.z]
+                mesh_info["world_aabb_position"] = [world_box.position.x, world_box.position.y, world_box.position.z]
+                mesh_info["world_aabb_size"] = [world_box.size.x, world_box.size.y, world_box.size.z]
+                mesh_info["surface_count"] = current.mesh.get_surface_count()
+                var materials: Array[Dictionary] = []
+                for surface_index in current.mesh.get_surface_count():
+                    var material: Material = current.get_active_material(surface_index)
+                    var material_info: Dictionary = {"surface": surface_index, "material_type": "null" if material == null else material.get_class()}
+                    if material is BaseMaterial3D:
+                        material_info["albedo"] = [material.albedo_color.r, material.albedo_color.g, material.albedo_color.b, material.albedo_color.a]
+                        material_info["transparency"] = material.transparency
+                        material_info["shading_mode"] = material.shading_mode
+                        material_info["cull_mode"] = material.cull_mode
+                    elif material is ShaderMaterial:
+                        material_info["shader"] = material.shader.resource_path
+                    materials.append(material_info)
+                mesh_info["materials"] = materials
             else:
                 invalid_meshes += 1
+                mesh_info["surface_count"] = 0
+            mesh_details.append(mesh_info)
         for child in current.get_children():
             pending.append(child)
     return {
         "mesh_instances": count,
         "visible_mesh_instances": visible_count,
         "surfaces": surfaces,
-        "mesh_instances_without_mesh": invalid_meshes
+        "mesh_instances_without_mesh": invalid_meshes,
+        "mesh_details": mesh_details
     }
 
 func _measure_foreground(image: Image) -> Dictionary:
