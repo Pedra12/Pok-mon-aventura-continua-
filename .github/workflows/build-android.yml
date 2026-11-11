@@ -67,10 +67,14 @@ jobs:
       - name: Importar e validar projeto Godot
         run: |
           set -euo pipefail
-          godot --headless --editor --path game --import
-          godot --headless --editor --path game --quit
-          godot --headless --path game --quit-after 5
-          godot --headless --path game --install-android-build-template
+          echo "IMPORT: iniciando importacao dos GLB"
+          timeout 12m godot --headless --editor --path game --import --verbose
+          echo "IMPORT: concluido; validando scripts"
+          timeout 5m godot --headless --editor --path game --quit --verbose
+          echo "SMOKE: iniciando jogo por 5 frames"
+          timeout 3m godot --headless --path game --quit-after 5 --verbose
+          echo "ANDROID TEMPLATE: instalando"
+          timeout 5m godot --headless --path game --install-android-build-template
           test -s game/android/build/AndroidManifest.xml
 
       - name: Configurar caminhos do SDK no Godot
