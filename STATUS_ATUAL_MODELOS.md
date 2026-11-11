@@ -24,7 +24,7 @@ Todas as etapas do workflow passaram no Godot 4.4.1:
 - 29 clipes reproduzidos sem erros.
 - 26 clipes apresentaram mudanças de pose esquelética.
 - 22 clipes apresentaram mudanças de transformação de nós.
-- 12/12 perfis de escala passaram na última validação concluída; o perfil de Sudowoodo foi acrescentado depois e está aguardando a nova execução automática do workflow.
+- 11/11 perfis de escala passaram na validação anterior. O perfil de Sudowoodo foi acrescentado depois e está aguardando a nova execução automática do workflow; portanto, ainda não conto esse novo perfil como aprovado.
 - O mapa foi preservado e carregado.
 - A análise do mapa encontrou 58 superfícies de malha e 55 candidatas geometricamente horizontais.
 
