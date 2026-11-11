@@ -13,7 +13,7 @@ func _initialize() -> void:
 func _run() -> void:
 	var report: Dictionary = {"status": "running", "models": {}, "errors": []}
 	for file_name in TARGETS:
-		var resource_path := "res://assets/" + file_name
+		var resource_path: String = "res://assets/" + str(file_name)
 		var packed := load(resource_path) as PackedScene
 		if packed == null:
 			report["errors"].append("Falha ao carregar " + file_name)
@@ -74,8 +74,8 @@ func _inspect_recursive(node: Node, root_node: Node, report: Dictionary) -> void
 			for surface_index in range(mesh.get_surface_count()):
 				var arrays: Array = mesh.surface_get_arrays(surface_index)
 				var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-				var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
-				var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+				var bones = arrays[Mesh.ARRAY_BONES]
+				var weights = arrays[Mesh.ARRAY_WEIGHTS]
 				var surface_data: Dictionary = {
 					"surface": surface_index,
 					"vertex_count": vertices.size(),
