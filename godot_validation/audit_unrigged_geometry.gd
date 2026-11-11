@@ -146,9 +146,12 @@ func _analyze_components(vertices: PackedVector3Array, index_data: Variant) -> A
 			}
 		var group: Dictionary = groups[root_index]
 		group["vertex_count"] += 1
-		group["min"] = (group["min"] as Vector3).min(vertices[vertex_index])
-		group["max"] = (group["max"] as Vector3).max(vertices[vertex_index])
-		group["sum"] = (group["sum"] as Vector3) + vertices[vertex_index]
+		var current_min: Vector3 = group["min"]
+		var current_max: Vector3 = group["max"]
+		var current_sum: Vector3 = group["sum"]
+		group["min"] = current_min.min(vertices[vertex_index])
+		group["max"] = current_max.max(vertices[vertex_index])
+		group["sum"] = current_sum + vertices[vertex_index]
 	for start in range(0, triangle_indices.size() - 2, 3):
 		var a := int(triangle_indices[start])
 		var b := int(triangle_indices[start + 1])
