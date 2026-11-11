@@ -69,6 +69,9 @@ jobs:
       - name: Auditar cada clipe em cinco pontos e mapear ossos e nos movimentados
         run: godot --headless --path godot_validation --script res://audit_animation_detail.gd
 
+      - name: Validar integridade e movimento dos relatorios JSON
+        run: python3 tools/validate_animation_reports.py
+
       - name: Testar reproducao de todos os clipes importados
         run: godot --headless --path godot_validation --script res://test_animation_playback.gd
 
