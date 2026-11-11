@@ -161,7 +161,7 @@ jobs:
               if old in s:
                   s = s.replace(old, new)
               elif new.split("=")[0] not in s:
-                  s += "\\n" + new + "\\n"
+                  s = s.rstrip() + chr(10) + new + chr(10)
           p.write_text(s)
           PY
           grep -E '^keystore/debug' game/export_presets.cfg
