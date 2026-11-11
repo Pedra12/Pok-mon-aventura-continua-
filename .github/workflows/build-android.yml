@@ -148,7 +148,11 @@ jobs:
           keytool -list -keystore "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH" -storepass "$GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD" -alias "$GODOT_ANDROID_KEYSTORE_DEBUG_USER"
           unzip -q "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_source.zip" -d game/android/build
           test -s game/android/build/build.gradle
-          echo "ANDROID BUILD TEMPLATE: instalado em game/android/build"
+          chmod +x game/android/build/gradlew
+          touch game/android/build/.gdignore
+          printf '%s\n' '4.4.1.stable' > game/android/.build_version
+          test "$(tr -d '\r\n' < game/android/.build_version)" = "4.4.1.stable"
+          echo "ANDROID BUILD TEMPLATE: instalado; marcador game/android/.build_version confirmado"
           python3 - <<'PY'
           from pathlib import Path
           p = Path("game/export_presets.cfg")
@@ -177,6 +181,12 @@ jobs:
           realpath game/project.godot
           echo "========== LS -LA GAME =========="
           ls -la game
+          echo "========== LS -LA GAME/ANDROID =========="
+          if [ -d game/android ]; then
+            ls -la game/android
+          else
+            echo "AUSENTE: game/android"
+          fi
           echo "========== LS -LA GAME/ANDROID/BUILD =========="
           if [ -d game/android/build ]; then
             ls -la game/android/build
@@ -184,10 +194,10 @@ jobs:
             echo "AUSENTE: game/android/build"
           fi
           echo "========== VERSAO DO TEMPLATE GRADLE =========="
-          if [ -f game/android/build/.build_version ]; then
-            echo "EXISTE: game/android/build/.build_version"
-            cat game/android/build/.build_version
-            template_version="$(tr -d '\r\n' < game/android/build/.build_version)"
+          if [ -f game/android/.build_version ]; then
+            echo "EXISTE: game/android/.build_version"
+            cat game/android/.build_version
+            template_version="$(tr -d '\r\n' < game/android/.build_version)"
             echo "VERSAO_LIDA=$template_version"
             if [ "$template_version" = "4.4.1.stable" ]; then
               echo "TEMPLATE_VERSION_MATCH=SIM"
@@ -195,7 +205,10 @@ jobs:
               echo "TEMPLATE_VERSION_MATCH=NAO (esperado 4.4.1.stable)"
             fi
           else
-            echo "AUSENTE: game/android/build/.build_version"
+            echo "AUSENTE: game/android/.build_version"
+          fi
+          if [ -f game/android/build/.build_version ]; then
+            echo "AVISO: marcador também encontrado em game/android/build/.build_version"
           fi
 
           echo "========== PRESET ANDROID COMPLETO (SENHAS REDIGIDAS) =========="
