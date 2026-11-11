@@ -97,6 +97,16 @@ func _capture_model(file_name: String) -> void:
     var wrapper := Node3D.new()
     wrapper.add_child(instance)
     stage.add_child(wrapper)
+    var profile_file := FileAccess.open("res://config/pokemon_scale_profiles.json", FileAccess.READ)
+    if profile_file != null:
+        var profile_data = JSON.parse_string(profile_file.get_as_text())
+        profile_file.close()
+        var profile_key := file_name
+        if typeof(profile_data) == TYPE_DICTIONARY and profile_data.has("pokemon") and profile_data["pokemon"].has(profile_key):
+            var profile: Dictionary = profile_data["pokemon"][profile_key]
+            wrapper.scale = Vector3.ONE * float(profile["uniform_scale"])
+            var offset: Array = profile["visual_offset"]
+            wrapper.position = Vector3(float(offset[0]), float(offset[1]), float(offset[2]))
     await process_frame
     await process_frame
 
