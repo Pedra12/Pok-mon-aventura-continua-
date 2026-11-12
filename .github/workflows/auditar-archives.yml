@@ -1,0 +1,27 @@
+name: Auditar ZIPs enviados
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'darko_with_pikachu_and_pokeballs.zip'
+      - 'pokemon_red_1996.zip'
+      - 'tools/audit_archives.py'
+      - '.github/workflows/auditar-archives.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pygltflib
+      - run: python tools/audit_archives.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: auditoria-arquivos-compactados
+          path: zip_audit/
+          if-no-files-found: error
+          retention-days: 30
