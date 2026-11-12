@@ -91,6 +91,7 @@ jobs:
           grep -Fq 'const MAP_PATH := "res://assets/original_pokemon_village.glb"' game/main.gd
           grep -Fq 'const POKEMON_PATH := "res://assets/squirtle.glb"' game/main.gd
           grep -Fq 'screen/orientation=0' game/export_presets.cfg
+          grep -Fq 'textures/vram_compression/import_etc2_astc=true' game/project.godot
           echo "CONFIG_OK cena principal, landscape, GL Compatibility, touch, mapa e Squirtle"
 
       - name: Importar e validar projeto Godot
