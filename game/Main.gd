@@ -161,6 +161,9 @@ func _build_hud() -> void:
     add_child(hud_layer)
     var root := Control.new()
     root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    # O painel ocupa a tela toda, mas nao pode bloquear o joystick em _unhandled_input.
+    # Os botoes filhos continuam recebendo os toques normalmente.
+    root.mouse_filter = Control.MOUSE_FILTER_IGNORE
     hud_layer.add_child(root)
 
     joystick_base = _make_circle_control(176, Color(0.05, 0.08, 0.12, 0.48))
