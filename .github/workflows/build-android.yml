@@ -84,12 +84,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'run/main_scene="res://main.tscn"' game/project.godot
+          grep -Fq 'run/main_scene="res://Main.tscn"' game/project.godot
           grep -Fq 'window/handheld/orientation=0' game/project.godot
           grep -Fq 'renderer/rendering_method="gl_compatibility"' game/project.godot
           grep -Fq 'pointing/emulate_touch_from_mouse=true' game/project.godot
-          grep -Fq 'const MAP_PATH := "res://assets/original_pokemon_village.glb"' game/main.gd
-          grep -Fq 'const POKEMON_PATH := "res://assets/squirtle.glb"' game/main.gd
+          grep -Fq 'const MAP_PATH := "res://assets/original_pokemon_village.glb"' game/Main.gd
+          grep -Fq 'const POKEMON_FILES := [' game/Main.gd
           grep -Fq 'screen/orientation=0' game/export_presets.cfg
           grep -Fq 'textures/vram_compression/import_etc2_astc=true' game/project.godot
           echo "CONFIG_OK cena principal, landscape, GL Compatibility, touch, mapa e Squirtle"
