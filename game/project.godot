@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 config/name="Pokemon Aventura Continua"
-run/main_scene="res://main.tscn"
+run/main_scene="res://Main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 
 [display]
