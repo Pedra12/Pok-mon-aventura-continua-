@@ -293,15 +293,20 @@ func _physics_process(delta: float) -> void:
         player.velocity.y -= 9.8 * delta
     player.move_and_slide()
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
+    # A interface processa os botoes antes deste metodo. Toques nos botoes
+    # nao podem iniciar o controle de camera.
+    var viewport_size := get_viewport().get_visible_rect().size
+    var camera_area_bottom := viewport_size.y * 0.60
+
     if event is InputEventScreenTouch:
         if event.pressed:
-            if event.position.x < get_viewport().get_visible_rect().size.x * 0.48 and event.position.y > get_viewport().get_visible_rect().size.y * 0.45:
+            if event.position.x < viewport_size.x * 0.48 and event.position.y > viewport_size.y * 0.45:
                 joystick_pointer = event.index
                 joystick_origin = event.position
                 joystick_current = event.position
                 _update_joystick()
-            elif event.position.x >= get_viewport().get_visible_rect().size.x * 0.48:
+            elif event.position.x >= viewport_size.x * 0.48 and event.position.y < camera_area_bottom:
                 touch_look_pointer = event.index
                 last_look = event.position
         else:
@@ -311,6 +316,7 @@ func _input(event: InputEvent) -> void:
                 _reset_joystick()
             if event.index == touch_look_pointer:
                 touch_look_pointer = -1
+
     elif event is InputEventScreenDrag:
         if event.index == joystick_pointer:
             joystick_current = event.position
@@ -319,12 +325,14 @@ func _input(event: InputEvent) -> void:
             var look_delta: Vector2 = event.position - last_look
             last_look = event.position
             _rotate_camera(look_delta)
+
     elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-        if event.pressed and event.position.x > get_viewport().get_visible_rect().size.x * 0.48:
+        if event.pressed and event.position.x >= viewport_size.x * 0.48 and event.position.y < camera_area_bottom:
             touch_look_pointer = 999
             last_look = event.position
         elif not event.pressed:
             touch_look_pointer = -1
+
     elif event is InputEventMouseMotion and touch_look_pointer == 999:
         var mouse_delta: Vector2 = event.position - last_look
         last_look = event.position
