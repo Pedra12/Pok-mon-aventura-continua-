@@ -66,6 +66,38 @@ func _run_test() -> void:
         quit(1)
         return
 
+    var hud_root: Control
+    var jump_found := false
+    var action_found := false
+    for child in game.get_children():
+        if child is CanvasLayer:
+            for hud_child in child.get_children():
+                if hud_child is Control:
+                    hud_root = hud_child
+                    for control in hud_child.get_children():
+                        if control is Button:
+                            if control.text == "PULAR":
+                                jump_found = true
+                            elif control.text == "AÇÃO":
+                                action_found = true
+                    break
+    if hud_root == null or hud_root.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+        push_error("SMOKE_FAIL: painel do HUD bloqueia os toques do joystick")
+        quit(1)
+        return
+    if not jump_found or not action_found:
+        push_error("SMOKE_FAIL: botoes PULAR/ACAO ausentes")
+        quit(1)
+        return
+
+    game.set("move_vector", Vector2(0, -1))
+    game.call("_physics_process", 0.1)
+    if Vector2(player_node.velocity.x, player_node.velocity.z).length() < 0.1:
+        push_error("SMOKE_FAIL: joystick nao gera velocidade de movimento")
+        quit(1)
+        return
+    game.set("move_vector", Vector2.ZERO)
+
     print("GAMEPLAY_SMOKE_OK scene=Main.tscn map_meshes=", map_meshes,
         " trainer=created camera=active pokemon_spawned=", creatures.size(),
         " mobile_hud=created")
