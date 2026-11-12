@@ -93,7 +93,7 @@ jobs:
           grep -Fq 'const POKEMON_FILES := [' game/Main.gd
           grep -Fq 'screen/orientation=0' game/export_presets.cfg
           grep -Fq 'textures/vram_compression/import_etc2_astc=true' game/project.godot
-          grep -Fq 'const trainer_path := "res://assets/red_trainer.glb"' game/Main.gd
+          grep -Fq 'var trainer_path := "res://assets/red_trainer.glb"' game/Main.gd
           echo "CONFIG_OK cena principal, landscape, GL Compatibility, touch, mapa, treinador Red e Pokemon"
 
       - name: Importar e validar projeto Godot
