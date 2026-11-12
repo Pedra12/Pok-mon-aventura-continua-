@@ -65,6 +65,8 @@ jobs:
           unzip -q /tmp/templates.tpz -d /tmp/godot-templates
           cp -a /tmp/godot-templates/templates/. "$HOME/.local/share/godot/export_templates/4.4.1.stable/"
           test -s "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_source.zip"
+          test -s "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_debug.apk"
+          test -s "$HOME/.local/share/godot/export_templates/4.4.1.stable/android_release.apk"
           godot --version
 
       - name: Preparar assets e configuracao
@@ -129,13 +131,16 @@ jobs:
           [resource]
           export/android/android_sdk_path = "$ANDROID_SDK_ROOT"
           export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/debug_keystore = "$HOME/.android/debug.keystore"
+          export/android/debug_keystore_user = "gdebugkey"
+          export/android/debug_keystore_pass = "debugpass123"
           EOF
           cp "$HOME/.config/godot/editor_settings-4.tres" "$HOME/.config/godot/editor_settings-4.4.tres"
           echo "GODOT EDITOR SETTINGS:"
           cat "$HOME/.config/godot/editor_settings-4.4.tres"
           export GODOT_ANDROID_KEYSTORE_DEBUG_PATH="$HOME/.android/debug.keystore"
-          export GODOT_ANDROID_KEYSTORE_DEBUG_USER="androiddebugkey"
-          export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD="android"
+          export GODOT_ANDROID_KEYSTORE_DEBUG_USER="gdebugkey"
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD="debugpass123"
           echo "::add-mask::$GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD"
           if [ ! -s "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH" ]; then
             keytool -genkeypair -v -keystore "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH" -storepass "$GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD" -alias "$GODOT_ANDROID_KEYSTORE_DEBUG_USER" -keypass "$GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD" -dname "CN=Android Debug,O=Android,C=US" -validity 10000 -keyalg RSA -keysize 2048
@@ -159,8 +164,8 @@ jobs:
           s = p.read_text()
           replacements = {
               'keystore/debug=""': 'keystore/debug="' + str(Path.home() / ".android/debug.keystore") + '"',
-              'keystore/debug_user=""': 'keystore/debug_user="androiddebugkey"',
-              'keystore/debug_password=""': 'keystore/debug_password="android"',
+              'keystore/debug_user=""': 'keystore/debug_user="gdebugkey"',
+              'keystore/debug_password=""': 'keystore/debug_password="debugpass123"',
           }
           for old, new in replacements.items():
               if old in s:
