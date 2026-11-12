@@ -32,6 +32,11 @@ var message_label: Label
 var pokemon_profiles: Dictionary = {}
 var nearby_pokemon: Array[Node3D] = []
 var encounter_cooldown := 0.0
+var trainer_animation_player: AnimationPlayer
+var trainer_idle_animation := ""
+var trainer_walk_animation := ""
+var trainer_run_animation := ""
+var trainer_is_moving := false
 
 func _ready() -> void:
     _load_profiles()
@@ -115,28 +120,40 @@ func _build_player() -> void:
     player.floor_max_angle = deg_to_rad(48)
     add_child(player)
 
-    var capsule := CapsuleMesh.new()
-    capsule.radius = 0.34
-    capsule.height = 1.72
-    var body_mesh := MeshInstance3D.new()
-    body_mesh.mesh = capsule
-    body_mesh.position.y = 0.86
-    var body_mat := StandardMaterial3D.new()
-    body_mat.albedo_color = Color(0.12, 0.32, 0.72)
-    body_mat.roughness = 0.78
-    body_mesh.material_override = body_mat
-    player.add_child(body_mesh)
+    var trainer_path := "res://assets/red_trainer.glb"
+    if ResourceLoader.exists(trainer_path):
+        var trainer_scene := load(trainer_path) as PackedScene
+        if trainer_scene:
+            var trainer_model := trainer_scene.instantiate() as Node3D
+            if trainer_model:
+                trainer_model.name = "RedTrainerModel"
+                player.add_child(trainer_model)
+                _setup_trainer_animations(trainer_model)
 
-    var head := MeshInstance3D.new()
-    var head_mesh := SphereMesh.new()
-    head_mesh.radius = 0.24
-    head_mesh.height = 0.48
-    head.mesh = head_mesh
-    head.position.y = 1.72
-    var skin := StandardMaterial3D.new()
-    skin.albedo_color = Color(0.82, 0.62, 0.46)
-    head.material_override = skin
-    player.add_child(head)
+    if player.get_node_or_null("RedTrainerModel") == null:
+        push_warning("Modelo Red nao carregado; usando visual provisório.")
+        var capsule := CapsuleMesh.new()
+        capsule.radius = 0.34
+        capsule.height = 1.72
+        var body_mesh := MeshInstance3D.new()
+        body_mesh.mesh = capsule
+        body_mesh.position.y = 0.86
+        var body_mat := StandardMaterial3D.new()
+        body_mat.albedo_color = Color(0.12, 0.32, 0.72)
+        body_mat.roughness = 0.78
+        body_mesh.material_override = body_mat
+        player.add_child(body_mesh)
+
+        var head := MeshInstance3D.new()
+        var head_mesh := SphereMesh.new()
+        head_mesh.radius = 0.24
+        head_mesh.height = 0.48
+        head.mesh = head_mesh
+        head.position.y = 1.72
+        var skin := StandardMaterial3D.new()
+        skin.albedo_color = Color(0.82, 0.62, 0.46)
+        head.material_override = skin
+        player.add_child(head)
 
     var shape := CollisionShape3D.new()
     var capsule_shape := CapsuleShape3D.new()
@@ -145,6 +162,36 @@ func _build_player() -> void:
     shape.shape = capsule_shape
     shape.position.y = 0.83
     player.add_child(shape)
+
+func _setup_trainer_animations(model: Node) -> void:
+    trainer_animation_player = _find_animation_player(model)
+    if trainer_animation_player == null:
+        push_warning("Modelo Red importado sem AnimationPlayer.")
+        return
+    var clips := trainer_animation_player.get_animation_list()
+    for clip in clips:
+        var clip_name := String(clip).to_lower()
+        if trainer_idle_animation == "" and "idle" in clip_name:
+            trainer_idle_animation = clip
+        elif trainer_walk_animation == "" and "walk" in clip_name:
+            trainer_walk_animation = clip
+        elif trainer_run_animation == "" and "run" in clip_name:
+            trainer_run_animation = clip
+    if trainer_idle_animation == "" and not clips.is_empty():
+        trainer_idle_animation = clips[0]
+    if trainer_walk_animation == "":
+        trainer_walk_animation = trainer_idle_animation
+    if trainer_run_animation == "":
+        trainer_run_animation = trainer_walk_animation
+    if trainer_idle_animation != "":
+        trainer_animation_player.play(trainer_idle_animation)
+
+func _update_trainer_animation(moving: bool) -> void:
+    if trainer_animation_player == null:
+        return
+    var wanted := trainer_walk_animation if moving else trainer_idle_animation
+    if wanted != "" and trainer_animation_player.current_animation != wanted:
+        trainer_animation_player.play(wanted, 0.18)
 
 func _build_camera() -> void:
     camera_pivot = Node3D.new()
@@ -289,9 +336,12 @@ func _physics_process(delta: float) -> void:
         player.velocity.x = direction.x * speed
         player.velocity.z = direction.z * speed
         player.rotation.y = lerp_angle(player.rotation.y, atan2(-direction.x, -direction.z), delta * 12.0)
+        trainer_is_moving = true
     else:
         player.velocity.x = move_toward(player.velocity.x, 0.0, 18.0 * delta)
         player.velocity.z = move_toward(player.velocity.z, 0.0, 18.0 * delta)
+        trainer_is_moving = false
+    _update_trainer_animation(trainer_is_moving)
     if not player.is_on_floor():
         player.velocity.y -= 9.8 * delta
     player.move_and_slide()

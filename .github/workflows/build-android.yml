@@ -77,7 +77,8 @@ jobs:
           find . -maxdepth 1 -type f -iname '*.glb' -print0 | while IFS= read -r -d '' f; do cp "$f" game/assets/; done
           cp config/pokemon_scale_profiles.json game/config/
           test -s game/assets/original_pokemon_village.glb
-          test "$(find game/assets -maxdepth 1 -type f -iname '*.glb' | wc -l)" -eq 14
+          test "$(find game/assets -maxdepth 1 -type f -iname '*.glb' | wc -l)" -eq 15
+          test -s game/assets/red_trainer.glb
           ls -lh game/assets
 
       - name: Conferir configuracao da cena e Android
@@ -92,7 +93,8 @@ jobs:
           grep -Fq 'const POKEMON_FILES := [' game/Main.gd
           grep -Fq 'screen/orientation=0' game/export_presets.cfg
           grep -Fq 'textures/vram_compression/import_etc2_astc=true' game/project.godot
-          echo "CONFIG_OK cena principal, landscape, GL Compatibility, touch, mapa e Squirtle"
+          grep -Fq 'const trainer_path := "res://assets/red_trainer.glb"' game/Main.gd
+          echo "CONFIG_OK cena principal, landscape, GL Compatibility, touch, mapa, treinador Red e Pokemon"
 
       - name: Importar e validar projeto Godot
         run: |
