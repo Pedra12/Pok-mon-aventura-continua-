@@ -1,0 +1,28 @@
+; Projeto principal do Pokemon Aventura Continua
+config_version=5
+
+[application]
+config/name="Pokemon Aventura Continua"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.4", "GL Compatibility")
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/handheld/orientation=0
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
+textures/default_filters/use_nearest_mipmap_filter=false
+environment/defaults/default_clear_color=Color(0.035, 0.055, 0.075, 1)
+
+[physics]
+3d/default_gravity=9.8
+
+[input_devices]
+pointing/emulate_touch_from_mouse=true

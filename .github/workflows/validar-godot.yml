@@ -1,0 +1,116 @@
+name: Validar importacao dos modelos 3D no Godot
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'godot_validation/**'
+      - 'config/**'
+      - 'tools/validate_scale_profiles.py'
+      - 'tools/validate_animation_reports.py'
+      - '.github/workflows/validar-godot.yml'
+      - '**.glb'
+
+concurrency:
+  group: validacao-godot-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Godot 4.4.1
+        shell: bash
+        run: |
+          curl -L --fail --retry 3 -o /tmp/godot.zip https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip
+          mkdir -p /tmp/godot
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.4.1-stable_linux.x86_64
+          sudo ln -sf /tmp/godot/Godot_v4.4.1-stable_linux.x86_64 /usr/local/bin/godot
+          godot --version
+
+      - name: Preparar projeto temporario com os GLBs originais
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p godot_validation/assets godot_validation/config
+          cp config/pokemon_scale_profiles.json godot_validation/config/
+          copied=0
+          while IFS= read -r -d '' file; do
+            cp "$file" godot_validation/assets/
+            copied=$((copied + 1))
+          done < <(find . -maxdepth 1 -type f -iname '*.glb' -print0)
+          echo "Arquivos GLB copiados: $copied"
+          find godot_validation/assets -maxdepth 1 -type f -iname '*.glb' -printf '%f\n' | sort
+          test "$copied" -gt 0
+          test -f godot_validation/assets/original_pokemon_village.glb
+
+      - name: Importar assets no Godot
+        run: godot --headless --editor --path godot_validation --import
+
+      - name: Validar script e cena do laboratorio 3D
+        run: godot --headless --path godot_validation --editor --quit
+
+      - name: Instalar servidor grafico virtual para capturas
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri
+
+      - name: Renderizar previews de todos os modelos e clipes
+        run: xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path godot_validation --rendering-driver opengl3 --script res://capture_visual_previews.gd
+
+
+      - name: Testar laboratorio em runtime com todos os modelos e clipes
+        run: godot --headless --path godot_validation --script res://lab_smoke_test.gd
+
+      - name: Auditar estrutura dos 16 clipes do Flygon
+        run: godot --headless --path godot_validation --script res://audit_flygon_clips.gd
+
+      - name: Verificar cenas, malhas, esqueletos e animacoes
+        run: godot --headless --path godot_validation --script res://validate_assets.gd
+
+      - name: Auditar cada clipe em cinco pontos e mapear ossos e nos movimentados
+        run: godot --headless --path godot_validation --script res://audit_animation_detail.gd
+
+      - name: Validar integridade e movimento dos relatorios JSON
+        run: python3 tools/validate_animation_reports.py
+
+      - name: Testar reproducao de todos os clipes importados
+        run: godot --headless --path godot_validation --script res://test_animation_playback.gd
+
+      - name: Validar perfis de escala e preservacao do mapa
+        run: python3 tools/validate_scale_profiles.py
+
+      - name: Validar escala e posicionamento nas instancias reais do Godot
+        run: godot --headless --path godot_validation --script res://validate_scaled_instances.gd
+
+      - name: Analisar superficies horizontais do mapa
+        if: always()
+        run: godot --headless --path godot_validation --script res://inspect_map_surfaces.gd
+
+      - name: Publicar relatorio de validacao
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validacao-importacao-godot
+          path: |
+            godot_validation/godot_validation_report.json
+            godot_validation/animation_detail_report.json
+            godot_validation/unrigged_geometry_report.json
+            godot_validation/animation_playback_smoke_report.json
+            godot_validation/lab_smoke_test_report.json
+            godot_validation/scale_profile_validation.json
+            godot_validation/scaled_instance_validation.json
+            godot_validation/map_surface_analysis.json
+            godot_validation/flygon_clip_audit.json
+            godot_validation/visual_previews/*.png
+            godot_validation/visual_previews/visual_capture_report.json
+          if-no-files-found: warn
+          retention-days: 30
